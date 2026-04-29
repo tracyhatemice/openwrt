@@ -1,0 +1,19 @@
+--- a/lib/libf2fs_io.c
++++ b/lib/libf2fs_io.c
+@@ -67,7 +67,15 @@ int dev_get_offset(__u64 blk_addr, off_t
+ 	return -1;
+ }
+
+-#ifndef HAVE_LSEEK64
++/*
++ * On musl >= 1.2.4 the legacy LFS64 interfaces are gone; configure's link
++ * test for lseek64 fails so HAVE_LSEEK64 is undefined.  But musl's
++ * <unistd.h>, with _LARGEFILE64_SOURCE in effect, still exposes lseek64
++ * as a macro aliased to lseek.  Defining a static inline lseek64 here
++ * then collides with the lseek prototype after macro expansion.  Skip
++ * the shim when the alias macro is already in scope.
++ */
++#if !defined(HAVE_LSEEK64) && !defined(lseek64)
+ typedef off_t	off64_t;
+
+ static inline off64_t lseek64(int fd, __u64 offset, int set)
