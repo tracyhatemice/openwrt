@@ -104,13 +104,14 @@
  	}
  
  	ring->in_sram = rx_flag == MTK_RX_FLAGS_NORMAL && !!eth->sram_pool;
-@@ -4839,9 +4876,29 @@ static void mtk_uninit(struct net_device
- 
+@@ -4839,10 +4876,29 @@ static void mtk_uninit(struct net_device
+
  static int mtk_change_mtu(struct net_device *dev, int new_mtu)
  {
 -	int length = new_mtu + MTK_RX_ETH_HLEN;
  	struct mtk_mac *mac = netdev_priv(dev);
  	struct mtk_eth *eth = mac->hw;
+-	int max_mtu, i;
 +	bool need_update, running[MTK_MAX_DEVS] = { 0 };
 +	int i, mtu, length, max_mtu = 0, rx_buf_len, err = 0;
 +
@@ -135,7 +136,7 @@
  
  	if (rcu_access_pointer(eth->prog) &&
  	    length > MTK_PP_MAX_BUF_SIZE) {
-@@ -4849,9 +4906,68 @@ static int mtk_change_mtu(struct net_dev
+@@ -4849,13 +4906,72 @@ static int mtk_change_mtu(struct net_dev
  		return -EINVAL;
  	}
  
@@ -202,9 +203,13 @@
 +			    new_mtu, eth->rx_buf_len);
 +	}
 +
+ 	max_mtu = mtk_max_gmac_mtu(eth);
+ 	for (i = 0; i < ARRAY_SIZE(eth->ppe); i++)
+ 		mtk_ppe_update_mtu(eth->ppe[i], max_mtu);
+
  	return 0;
  }
- 
+
 @@ -5600,7 +5716,7 @@ no_pcs:
  
  	mac->phylink = phylink;
