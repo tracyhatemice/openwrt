@@ -36,3 +36,6 @@ git-src
 .ccache
 .sccache
 .vscode*
+/.claude/
+/.config.*
+/diffconfig.*
