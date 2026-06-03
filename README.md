@@ -37,6 +37,22 @@ Notes:
 
 ### Configuration flags (MTK extensions)
 
+All of these have safe defaults — **none require configuration to boot**. With an
+unmodified config, the generator behaves as follows:
+
+| Flag | Default | Default behaviour (no user config) |
+|---|---|---|
+| EDCCA | `edcca_enable=1` | Auto-enabled with `compensation=-6`, thresholds `-60/-62/-59/-54` — emitted even when `/etc/config/advanced` is absent |
+| `vendor_vht` | `0` (off) | No VHT/256-QAM on 2.4 GHz; standard 2.4 GHz operation (no `vendor_vht`/`ieee80211ac`/VHT caps emitted) |
+| `itxbfen` (iBF) | unset | `ibf_enable` **not emitted** → driver/hostapd default implicit-BF behaviour |
+| `etxbfen` (eBF) | `1` (on) | SU/MU beamformer + beamformee caps kept (explicit BF enabled); `etxbfen=0` drops them |
+| `lpi_enable` | `0` | `lpi_enable=0` emitted → Low Power Indoor off |
+| `sku_idx` | `0` | `sku_idx=0` emitted → default regulatory SKU / power table |
+| `beacon_dup` | `1` | `beacon_dup=1` emitted → beacon duplication on |
+| `obss_interval` | n/a (fixed) | `obss_interval=300` emitted only when `ht_coex` is enabled; otherwise not emitted |
+
+Per-flag detail and config syntax follow.
+
 **EDCCA** (Energy Detection CCA) — read by the ucode hostapd config generator from
 `/etc/config/advanced`, applied per radio. Create an `edcca` section:
 
