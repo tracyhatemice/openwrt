@@ -25,7 +25,7 @@ here for provenance and traceability.
 | **hostapd** | 25 MTK patches into `package/network/services/hostapd/patches/mtk/`, plus a `Build/Patch` block in `package/network/services/hostapd/Makefile` applying the `mtk/` subdir after the base patches. Same hostapd source as vanilla (`2026-04-02`); the 59 base OpenWrt patches are untouched | pesa1234 `next-r4.8.3.rss.mtk`, copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 hostapd set (`autobuild/autobuild_5.4_mac80211_release/.../hostapd/patches`). vs feed: 5 identical, 12 modified (mostly trailer/typo; `0013` EDCCA & `0116` txpower are real rewrites), 8 pesa-original |
 | **mt76** | 92 mt7915 patches in `package/kernel/mt76/patches/` (flat), plus Makefile changes (always-on `CONFIG_NL80211_TESTMODE`, `MAC80211_DEBUGFS`, `Build/Compile`). Source pin kept on **upstream `openwrt/mt76`** and bumped to the latest commit `2ab64980` (2026-06-02); 2 of pesa's 94 patches (`002-hrtimer_setup`, `003-ccflags`) dropped as already upstreamed | pesa1234 `next-r4.8.3.rss.mtk` (patches only; source pin **not** switched to pesa's fork) | MediaTek `mtk-openwrt-feeds` mt7915/WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mt76/patches`) |
 | **iwinfo** | 1 patch `patches/0001-nl80211-add-support-for-QAM-256-in-2.4GHz-802.11n` | pesa1234 `next-r4.8.3.rss.mtk` | **pesa-original** (the MTK feed has no iwinfo patches) |
-| **wifi-scripts** | EDCCA + `vendor_vht` config glue **ported into the ucode pipeline** (`files-ucode/usr/share/ucode/wifi/hostapd.uc` + `vendor_vht` added to `files-ucode/usr/share/schema/wireless.wifi-device.json`) | pesa1234 had this only in the **shell** variant (`files/`), inert under `CONFIG_WIFI_SCRIPTS_UCODE=y`; re-implemented here for ucode | pesa-original (not in the MTK feed, which carries EDCCA only as a hostapd C patch) |
+| **wifi-scripts** | EDCCA + `vendor_vht` + iBF/eBF (`itxbfen`/`etxbfen`) config glue **ported into the ucode pipeline** (`files-ucode/usr/share/ucode/wifi/hostapd.uc` + new options in `files-ucode/usr/share/schema/wireless.wifi-device.json`) | pesa1234 had this only in the **shell** variant (`files/`), inert under `CONFIG_WIFI_SCRIPTS_UCODE=y`; re-implemented here for ucode | pesa-original (not in the MTK feed, which carries these only as hostapd C patches) |
 
 Notes:
 - Imported patches apply cleanly on backports 6.18.26 and build `kmod-mac80211` /
@@ -67,6 +67,19 @@ the VHT capabilities (`vht_capab`, `vht_oper_chwidth`, `vht_oper_centr_freq_seg0
 for the 2.4 GHz radio in addition to `vendor_vht=1` — mirroring pesa's shell
 `enable_ac || vendor_vht` logic. Normal 2.4 GHz operation (without `vendor_vht`) is
 unaffected.
+
+**iBF / eBF** — per-device options in `/etc/config/wireless` (`config wifi-device`):
+
+```
+config wifi-device 'radio0'
+	option itxbfen '1'    # implicit TX beamforming -> hostapd ibf_enable=1 (omit option to leave unset)
+	option etxbfen '1'    # explicit TX beamforming (default 1); set 0 to drop SU/MU beamformer+beamformee caps
+```
+
+`itxbfen` emits `ibf_enable=<0|1>` only when the option is present. `etxbfen=0`
+clears `su_beamformer`/`su_beamformee`/`mu_beamformer` (VHT) and
+`he_su_beamformer`/`he_mu_beamformer` (HE) before the capability strings are built.
+The `ibf_enable` hostapd key is provided by the imported `mtk/` iBF hostapd patch.
 
 ## Download
 
