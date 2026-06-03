@@ -81,6 +81,20 @@ clears `su_beamformer`/`su_beamformee`/`mu_beamformer` (VHT) and
 `he_su_beamformer`/`he_mu_beamformer` (HE) before the capability strings are built.
 The `ibf_enable` hostapd key is provided by the imported `mtk/` iBF hostapd patch.
 
+**lpi_enable / sku_idx / beacon_dup** — per-device options in `/etc/config/wireless`
+(`config wifi-device`), emitted on every radio with defaults (`lpi_enable=0`,
+`sku_idx=0`, `beacon_dup=1`) and user-overridable:
+
+```
+config wifi-device 'radio0'
+	option lpi_enable '0'   # Low Power Indoor mode
+	option sku_idx    '0'   # regulatory SKU / power-table index
+	option beacon_dup '1'   # beacon duplication
+```
+
+These hostapd keys are provided by the imported `mtk/` hostapd + mt76 patches.
+(`obss_interval` is **not** exposed — pesa hardwires it to 300 when `ht_coex=1`.)
+
 ## Download
 
 Built firmware images are available for many architectures and come with a
