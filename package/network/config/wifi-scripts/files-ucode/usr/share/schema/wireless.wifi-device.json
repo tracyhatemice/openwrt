@@ -559,6 +559,11 @@
 			"type": "boolean",
 			"default": false
 		},
+		"vendor_vht": {
+			"description": "Enable VHT (256-QAM) on the 2.4 GHz band (MediaTek vendor extension).",
+			"type": "boolean",
+			"default": false
+		},
 		"okc": {
 			"description": "Enable Opportunistic Key Caching",
 			"type": "boolean"
