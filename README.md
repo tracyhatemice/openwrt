@@ -23,6 +23,9 @@ here for provenance and traceability.
 | **kernel / target** (`mediatek/filogic`, 6.18) | 22 MTK patches (`999-*`) added under `target/linux/mediatek/patches-6.18/` (139 total = 117 vanilla + 22 custom) — `mtk_eth_soc` RSS/LRO, jumbo frames, 2.5G rate limit, NAPI tuning; `mtk_wed` (Wireless Ethernet Dispatch) hwrro/SER/cleanup/reset fixes; plus mt7981/mt7986 DTS (RSS irqs, PMU) and USB power control. Pure additions; no vanilla patch modified | pesa1234 `next-r4.8.3.rss.mtk` (synced verbatim) | MediaTek `mtk-openwrt-feeds` `mtk_eth_soc` / WED downstream |
 | **mac80211** | 25 MTK patches into `package/kernel/mac80211/patches/mtk/`, plus 2 lines in `package/kernel/mac80211/Makefile` registering the `mtk/` patch subdir (applied right after `subsys/`) | pesa1234 branch `next-r4.8.3.rss.mtk` (backports **6.18.26**), copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mac80211/patches/subsys/`), which pesa1234 relocates to a `mtk/` subdir |
 | **hostapd** | 25 MTK patches into `package/network/services/hostapd/patches/mtk/`, plus a `Build/Patch` block in `package/network/services/hostapd/Makefile` applying the `mtk/` subdir after the base patches. Same hostapd source as vanilla (`2026-04-02`); the 59 base OpenWrt patches are untouched | pesa1234 `next-r4.8.3.rss.mtk`, copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 hostapd set (`autobuild/autobuild_5.4_mac80211_release/.../hostapd/patches`). vs feed: 5 identical, 12 modified (mostly trailer/typo; `0013` EDCCA & `0116` txpower are real rewrites), 8 pesa-original |
+| **mt76** | 92 mt7915 patches in `package/kernel/mt76/patches/` (flat), plus Makefile changes (always-on `CONFIG_NL80211_TESTMODE`, `MAC80211_DEBUGFS`, `Build/Compile`). Source pin kept on **upstream `openwrt/mt76`** and bumped to the latest commit `2ab64980` (2026-06-02); 2 of pesa's 94 patches (`002-hrtimer_setup`, `003-ccflags`) dropped as already upstreamed | pesa1234 `next-r4.8.3.rss.mtk` (patches only; source pin **not** switched to pesa's fork) | MediaTek `mtk-openwrt-feeds` mt7915/WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mt76/patches`) |
+| **iwinfo** | 1 patch `patches/0001-nl80211-add-support-for-QAM-256-in-2.4GHz-802.11n` | pesa1234 `next-r4.8.3.rss.mtk` | **pesa-original** (the MTK feed has no iwinfo patches) |
+| **wifi-scripts** | EDCCA + `vendor_vht` config glue **ported into the ucode pipeline** (`files-ucode/usr/share/ucode/wifi/hostapd.uc` + `vendor_vht` added to `files-ucode/usr/share/schema/wireless.wifi-device.json`) | pesa1234 had this only in the **shell** variant (`files/`), inert under `CONFIG_WIFI_SCRIPTS_UCODE=y`; re-implemented here for ucode | pesa-original (not in the MTK feed, which carries EDCCA only as a hostapd C patch) |
 
 Notes:
 - Imported patches apply cleanly on backports 6.18.26 and build `kmod-mac80211` /
@@ -32,7 +35,36 @@ Notes:
 - The feed's default `unified/.../25.12/` profile targets mt7996 / WiFi-7 and is **not**
   used here; the GL-MT6000 uses the mt7915 / WiFi-6 patch set.
 
-_Planned: mt76 driver patches (pesa1234 `next-r4.8.3.rss.mtk`) — not yet imported._
+### Configuration flags (MTK extensions)
+
+**EDCCA** (Energy Detection CCA) — read by the ucode hostapd config generator from
+`/etc/config/advanced`, applied per radio. Create an `edcca` section:
+
+```
+config edcca
+	option edcca_enable    '1'    # 1=auto (default), 0=force-disable
+	option compensation    '-6'   # dBm, range -126..126 (default -6)
+	option thres_0         '-60'  # BW20  threshold (dBm)
+	option thres_1         '-62'  # BW40  threshold
+	option thres_2         '-59'  # BW80  threshold
+	option thres_3         '-54'  # BW160 threshold
+```
+
+If the section/options are absent, the defaults above are used. Emits
+`edcca_enable` / `edcca_compensation` / `edcca_threshold` to the hostapd config
+(keys provided by the `mtk/` hostapd EDCCA patch).
+
+**vendor_vht** — per-device option in `/etc/config/wireless` (`config wifi-device`),
+boolean, to enable VHT (256-QAM) on 2.4 GHz:
+
+```
+config wifi-device 'radio0'
+	option vendor_vht '1'
+```
+
+> **Known limitation:** `vendor_vht` currently only emits `vendor_vht=1`; the
+> 2.4 GHz VHT-capability generation that pesa's shell forced is **not yet ported**
+> to the ucode pipeline. EDCCA is fully ported. Tracked as a TODO.
 
 ## Download
 
