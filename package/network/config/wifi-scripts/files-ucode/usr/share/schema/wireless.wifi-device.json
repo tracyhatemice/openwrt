@@ -564,6 +564,15 @@
 			"type": "boolean",
 			"default": false
 		},
+		"itxbfen": {
+			"description": "Enable implicit TX beamforming (iBF) on the radio (MediaTek). Emits hostapd ibf_enable=.",
+			"type": "boolean"
+		},
+		"etxbfen": {
+			"description": "Enable explicit TX beamforming (eBF) (MediaTek). When false, drops the SU/MU beamformer+beamformee capabilities (VHT and HE).",
+			"type": "boolean",
+			"default": true
+		},
 		"okc": {
 			"description": "Enable Opportunistic Key Caching",
 			"type": "boolean"
