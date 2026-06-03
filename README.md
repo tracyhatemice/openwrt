@@ -62,9 +62,11 @@ config wifi-device 'radio0'
 	option vendor_vht '1'
 ```
 
-> **Known limitation:** `vendor_vht` currently only emits `vendor_vht=1`; the
-> 2.4 GHz VHT-capability generation that pesa's shell forced is **not yet ported**
-> to the ucode pipeline. EDCCA is fully ported. Tracked as a TODO.
+When set on a 2.4 GHz device, the ucode generator forces `ieee80211ac=1` and emits
+the VHT capabilities (`vht_capab`, `vht_oper_chwidth`, `vht_oper_centr_freq_seg0_idx`)
+for the 2.4 GHz radio in addition to `vendor_vht=1` — mirroring pesa's shell
+`enable_ac || vendor_vht` logic. Normal 2.4 GHz operation (without `vendor_vht`) is
+unaffected.
 
 ## Download
 
