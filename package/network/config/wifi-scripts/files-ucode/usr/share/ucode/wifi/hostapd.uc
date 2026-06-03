@@ -582,6 +582,11 @@ function generate(config) {
 	/* MTK iBF: implicit TX beamforming enable (emit only if configured) */
 	append('ibf_enable', config.itxbfen);
 
+	/* MTK device knobs: emitted on every radio with their schema defaults
+	 * (lpi_enable=0, sku_idx=0, beacon_dup=1), user-overridable. Keys are
+	 * provided by the imported mtk/ hostapd + mt76 patches. */
+	append_vars(config, [ 'lpi_enable', 'sku_idx', 'beacon_dup' ]);
+
 	/* hwmode, channel, op_class, ... */
 	append_vars(config, [ 'hw_mode', 'channel', 'rts_threshold', 'chanlist' ]);
 	if (config.hw_mode in [ 'a', 'g' ] && config.require_mode in [ 'n', 'ac', 'ax' ]) {
