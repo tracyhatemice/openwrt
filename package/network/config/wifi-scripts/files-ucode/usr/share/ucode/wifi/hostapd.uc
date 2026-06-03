@@ -317,6 +317,19 @@ function device_htmode_append(config) {
 	if (config.vendor_vht && config.band == '2g')
 		config.ieee80211ac = 1;
 
+	/*
+	 * MTK eBF: when explicit TX beamforming is disabled (etxbfen=0), drop the
+	 * SU/MU beamformer + beamformee capabilities for both VHT and HE, so the
+	 * capability blocks below omit them. (Ported from pesa1234's shell glue.)
+	 */
+	if (!config.etxbfen) {
+		config.su_beamformer = false;
+		config.su_beamformee = false;
+		config.mu_beamformer = false;
+		config.he_su_beamformer = false;
+		config.he_mu_beamformer = false;
+	}
+
 	if (config.ieee80211ac &&
 	    (config.hw_mode == 'a' || (config.hw_mode == 'g' && config.vendor_vht))) {
 		/* VHT capab */
@@ -565,6 +578,9 @@ function generate(config) {
 		adv.get_first('advanced', 'edcca', 'thres_3') ?? '-54',
 	]);
 	append_vars(config, [ 'vendor_vht' ]);
+
+	/* MTK iBF: implicit TX beamforming enable (emit only if configured) */
+	append('ibf_enable', config.itxbfen);
 
 	/* hwmode, channel, op_class, ... */
 	append_vars(config, [ 'hw_mode', 'channel', 'rts_threshold', 'chanlist' ]);
