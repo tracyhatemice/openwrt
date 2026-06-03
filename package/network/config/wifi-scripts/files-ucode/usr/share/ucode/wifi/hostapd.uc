@@ -208,6 +208,11 @@ function device_htmode_append(config) {
 			config.ht_capab += rx_stbc[min(config.rx_stbc, (ht_capab >> 8) & 3)];
 
 			append_vars(config, [ 'ieee80211n', 'ht_coex', 'ht_capab' ]);
+
+			/* MTK: OBSS scan interval when HT coexistence is enabled
+			 * (pesa1234 hardwires obss_interval=300 on ht_coex=1) */
+			if (config.ht_coex)
+				append('obss_interval', 300);
 		}
 	}
 

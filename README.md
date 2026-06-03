@@ -93,7 +93,9 @@ config wifi-device 'radio0'
 ```
 
 These hostapd keys are provided by the imported `mtk/` hostapd + mt76 patches.
-(`obss_interval` is **not** exposed — pesa hardwires it to 300 when `ht_coex=1`.)
+
+`obss_interval` is not a user option: like pesa, the generator emits a fixed
+`obss_interval=300` whenever `ht_coex` is enabled on the radio.
 
 ## Download
 
