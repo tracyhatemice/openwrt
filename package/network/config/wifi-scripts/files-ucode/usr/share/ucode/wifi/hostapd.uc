@@ -307,7 +307,18 @@ function device_htmode_append(config) {
 		append_vars(config, [ 'op_class' ]);
 	}
 
-	if (config.ieee80211ac && config.hw_mode == 'a') {
+	/*
+	 * MTK vendor_vht: advertise VHT (256-QAM) on the 2.4 GHz band. Normally
+	 * ieee80211ac is only set for VHT htmodes and VHT capab is only emitted on
+	 * 5 GHz (hw_mode 'a'). When vendor_vht is set on a 2.4 GHz device, force
+	 * ieee80211ac on and let the VHT capab block below run for hw_mode 'g'.
+	 * (Ported from pesa1234's shell wifi-scripts `enable_ac || vendor_vht`.)
+	 */
+	if (config.vendor_vht && config.band == '2g')
+		config.ieee80211ac = 1;
+
+	if (config.ieee80211ac &&
+	    (config.hw_mode == 'a' || (config.hw_mode == 'g' && config.vendor_vht))) {
 		/* VHT capab */
 		if (config.vht_oper_chwidth < 2) {
 			config.vht160 = 0;
