@@ -10,6 +10,7 @@ import * as iface from 'wifi.iface';
 import * as nl80211 from 'nl80211';
 import * as ap from 'wifi.ap';
 import * as fs from 'fs';
+import * as libuci from 'uci';
 
 const NL80211_EXT_FEATURE_ENABLE_FTM_RESPONDER = 33;
 const NL80211_EXT_FEATURE_RADAR_BACKGROUND = 61;
@@ -535,6 +536,24 @@ function generate(config) {
 
 	/* TX Power */
 	append_vars(config, [ 'min_tx_power' ]);
+
+	/*
+	 * MTK EDCCA + vendor_vht (ported from pesa1234 next-r4.8.3.rss.mtk
+	 * wifi-scripts shell glue, which only covered the non-ucode variant).
+	 * EDCCA values come from /etc/config/advanced @edcca[0]; defaults match
+	 * pesa's. The edcca_*/vendor_vht hostapd keys are provided by the MTK
+	 * hostapd patches under patches/mtk/.
+	 */
+	let adv = libuci.cursor();
+	append('edcca_enable', adv.get_first('advanced', 'edcca', 'edcca_enable') ?? '1');
+	append('edcca_compensation', adv.get_first('advanced', 'edcca', 'compensation') ?? '-6');
+	append('edcca_threshold', [
+		adv.get_first('advanced', 'edcca', 'thres_0') ?? '-60',
+		adv.get_first('advanced', 'edcca', 'thres_1') ?? '-62',
+		adv.get_first('advanced', 'edcca', 'thres_2') ?? '-59',
+		adv.get_first('advanced', 'edcca', 'thres_3') ?? '-54',
+	]);
+	append_vars(config, [ 'vendor_vht' ]);
 
 	/* hwmode, channel, op_class, ... */
 	append_vars(config, [ 'hw_mode', 'channel', 'rts_threshold', 'chanlist' ]);
