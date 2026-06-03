@@ -11,6 +11,28 @@ full customization, to use the device in ways never envisioned.
 
 Sunshine!
 
+## Fork notes: patches imported over vanilla
+
+This fork tracks OpenWrt `main` plus a small set of MediaTek WiFi and SoC/Ethernet
+patches for the **GL.iNet GL-MT6000** (MT7986 + MT7976, target `mediatek/filogic`,
+WiFi-6 / mt7915 driver family). Patches are imported on top of vanilla and recorded
+here for provenance and traceability.
+
+| Package | What was imported | From | Upstream origin |
+|---|---|---|---|
+| **kernel / target** (`mediatek/filogic`, 6.18) | 22 MTK patches (`999-*`) added under `target/linux/mediatek/patches-6.18/` (139 total = 117 vanilla + 22 custom) — `mtk_eth_soc` RSS/LRO, jumbo frames, 2.5G rate limit, NAPI tuning; `mtk_wed` (Wireless Ethernet Dispatch) hwrro/SER/cleanup/reset fixes; plus mt7981/mt7986 DTS (RSS irqs, PMU) and USB power control. Pure additions; no vanilla patch modified | pesa1234 `next-r4.8.3.rss.mtk` (synced verbatim) | MediaTek `mtk-openwrt-feeds` `mtk_eth_soc` / WED downstream |
+| **mac80211** | 25 MTK patches into `package/kernel/mac80211/patches/mtk/`, plus 2 lines in `package/kernel/mac80211/Makefile` registering the `mtk/` patch subdir (applied right after `subsys/`) | pesa1234 branch `next-r4.8.3.rss.mtk` (backports **6.18.26**), copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mac80211/patches/subsys/`), which pesa1234 relocates to a `mtk/` subdir |
+
+Notes:
+- Imported patches apply cleanly on backports 6.18.26 and build `kmod-mac80211` /
+  `kmod-cfg80211` for `mediatek/filogic`.
+- Everything else under `package/kernel/mac80211/patches/` is unchanged from vanilla;
+  the `mtk/` directory is the only addition.
+- The feed's default `unified/.../25.12/` profile targets mt7996 / WiFi-7 and is **not**
+  used here; the GL-MT6000 uses the mt7915 / WiFi-6 patch set.
+
+_Planned: mt76 driver patches (pesa1234 `next-r4.8.3.rss.mtk`) — not yet imported._
+
 ## Download
 
 Built firmware images are available for many architectures and come with a
