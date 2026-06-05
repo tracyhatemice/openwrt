@@ -570,7 +570,7 @@ function generate(config) {
 	 * MTK EDCCA + vendor_vht (ported from pesa1234 next-r4.8.3.rss.mtk
 	 * wifi-scripts shell glue, which only covered the non-ucode variant).
 	 * EDCCA values come from /etc/config/advanced @edcca[0]; defaults match
-	 * pesa's. The edcca_*/vendor_vht hostapd keys are provided by the MTK
+	 * pesa's. The edcca_* and vendor_vht hostapd keys are provided by the MTK
 	 * hostapd patches under patches/mtk/.
 	 */
 	let adv = libuci.cursor();

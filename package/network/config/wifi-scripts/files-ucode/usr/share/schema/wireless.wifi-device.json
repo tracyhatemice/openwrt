@@ -580,7 +580,7 @@
 		},
 		"sku_idx": {
 			"description": "Regulatory SKU / power table index (MediaTek). Emits hostapd sku_idx=.",
-			"type": "integer",
+			"type": "number",
 			"default": 0
 		},
 		"beacon_dup": {
