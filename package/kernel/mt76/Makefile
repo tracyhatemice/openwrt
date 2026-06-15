@@ -6,7 +6,7 @@ PKG_RELEASE=1
 PKG_LICENSE:=BSD-3-Clause-Clear
 PKG_LICENSE_FILES:=
 
-PKG_SOURCE_URL:=https://github.com/openwrt/mt76
+PKG_SOURCE_URL:=https://github.com/tracyhatemice/mt76
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_DATE:=2026-10-08
 PKG_SOURCE_VERSION:=467ae2e3f190baf737e15e318906da0dc7d0ab91
