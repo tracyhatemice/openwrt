@@ -23,7 +23,7 @@ here for provenance and traceability.
 | **kernel / target** (`mediatek/filogic`, 6.18) | 22 MTK patches (`999-*`) added under `target/linux/mediatek/patches-6.18/` (139 total = 117 vanilla + 22 custom) — `mtk_eth_soc` RSS/LRO, jumbo frames, 2.5G rate limit, NAPI tuning; `mtk_wed` (Wireless Ethernet Dispatch) hwrro/SER/cleanup/reset fixes; plus mt7981/mt7986 DTS (RSS irqs, PMU) and USB power control. Pure additions; no vanilla patch modified | pesa1234 `next-r4.8.3.rss.mtk` (synced verbatim) | MediaTek `mtk-openwrt-feeds` `mtk_eth_soc` / WED downstream |
 | **mac80211** | 25 MTK patches into `package/kernel/mac80211/patches/mtk/`, plus 2 lines in `package/kernel/mac80211/Makefile` registering the `mtk/` patch subdir (applied right after `subsys/`) | pesa1234 branch `next-r4.8.3.rss.mtk` (backports **6.18.26**), copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mac80211/patches/subsys/`), which pesa1234 relocates to a `mtk/` subdir |
 | **hostapd** | 25 MTK patches into `package/network/services/hostapd/patches/mtk/`, plus a `Build/Patch` block in `package/network/services/hostapd/Makefile` applying the `mtk/` subdir after the base patches. Same hostapd source as vanilla (`2026-04-02`); the 59 base OpenWrt patches are untouched | pesa1234 `next-r4.8.3.rss.mtk`, copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 hostapd set (`autobuild/autobuild_5.4_mac80211_release/.../hostapd/patches`). vs feed: 5 identical, 12 modified (mostly trailer/typo; `0013` EDCCA & `0116` txpower are real rewrites), 8 pesa-original |
-| **mt76** | 92 mt7915 patches in `package/kernel/mt76/patches/` (flat), plus Makefile changes (always-on `CONFIG_NL80211_TESTMODE`, `MAC80211_DEBUGFS`, `Build/Compile`). Source pin kept on **upstream `openwrt/mt76`** and bumped to the latest commit `2ab64980` (2026-06-02); 2 of pesa's 94 patches (`002-hrtimer_setup`, `003-ccflags`) dropped as already upstreamed | pesa1234 `next-r4.8.3.rss.mtk` (patches only; source pin **not** switched to pesa's fork) | MediaTek `mtk-openwrt-feeds` mt7915/WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mt76/patches`) |
+| **mt76** | **93** mt7915 patches in `package/kernel/mt76/patches/` (flat), plus Makefile changes (always-on `CONFIG_NL80211_TESTMODE`, `MAC80211_DEBUGFS`, `Build/Compile`). Source pin on **upstream `openwrt/mt76` `59676919`** (2026-07-01), which now ships the newer mt7986 firmware **and native HW ATF/VoW** — so no custom fork is needed. Local deltas vs pesa's stack: `2004-wed-HW-ATF` **dropped** (it duplicated upstream's now-native VoW), its developer tuning knobs re-added on top of upstream as `9999-07-…-add-vow-debugfs-tuning-knobs`; `9999-08-…-fix-vow-band-after-init-vif-split` moves upstream's `mt7915_mcu_set_vow_band()` into `init_vif()` after pesa's `1012` splits it out of `add_interface()` (also covers testmode's iBF-cal second vif; adopted from pesa's r4.9.1 807e449d22). See the `vow_atf` runtime note below | pesa1234 `next-r4.8.3.rss.mtk` (patches only; source pin on upstream `openwrt/mt76`, **not** a fork) | MediaTek `mtk-openwrt-feeds` mt7915/WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mt76/patches`) |
 | **iwinfo** | 1 patch `patches/0001-nl80211-add-support-for-QAM-256-in-2.4GHz-802.11n` | pesa1234 `next-r4.8.3.rss.mtk` | **pesa-original** (the MTK feed has no iwinfo patches) |
 | **wifi-scripts** | EDCCA + `vendor_vht` + iBF/eBF (`itxbfen`/`etxbfen`) config glue **ported into the ucode pipeline** (`files-ucode/usr/share/ucode/wifi/hostapd.uc` + new options in `files-ucode/usr/share/schema/wireless.wifi-device.json`) | pesa1234 had this only in the **shell** variant (`files/`), inert under `CONFIG_WIFI_SCRIPTS_UCODE=y`; re-implemented here for ucode | pesa-original (not in the MTK feed, which carries these only as hostapd C patches) |
 | **bpf-headers** | 1-line bump in `package/kernel/bpf-headers/Makefile`: `PKG_PATCHVER` `6.12` → `6.18` to match the `mediatek/filogic` target kernel. bpf-headers reuses the already-downloaded target tarball instead of fetching a separate `linux-6.12.x` kernel at compile time. The 2 fork-carried bpf patches (`100-support_hz_300`, `102-net-flow_offload`) apply cleanly to 6.18 | fork-local build fix | N/A (vanilla pins bpf-headers to the OpenWrt default 6.12 kernel; not a pesa/MTK patch) |
@@ -113,6 +113,31 @@ These hostapd keys are provided by the imported `mtk/` hostapd + mt76 patches.
 
 `obss_interval` is not a user option: like pesa, the generator emits a fixed
 `obss_interval=300` whenever `ht_coex` is enabled on the radio.
+
+### Runtime: HW airtime fairness (`vow_atf`)
+
+Upstream `openwrt/mt76` gained native **hardware airtime fairness (ATF)** — the
+MAC's weighted-DWRR (VoW) scheduler balancing TX airtime between stations on the
+offloaded/WED path where the host has no airtime accounting — in
+[openwrt/mt76 `6b7b986`](https://github.com/openwrt/mt76/commit/6b7b98627bcc0b31423c52b730a8e3c8ed9a3349).
+This fork tracks upstream mt76, so it is present on the **GL-MT6000** (mt7986) and
+**OpenWrt One** (mt7981); mt7915 is excluded.
+
+It is **enabled by default** and toggled at runtime via debugfs (device-wide; ATF
+and WATF together):
+
+```
+cat  /sys/kernel/debug/ieee80211/phy0/mt76/vow_atf     # 1 = on, 0 = off
+echo 0 > /sys/kernel/debug/ieee80211/phy0/mt76/vow_atf # disable
+echo 1 > /sys/kernel/debug/ieee80211/phy0/mt76/vow_atf # enable
+```
+
+The phy number can vary — find it with
+`ls -d /sys/kernel/debug/ieee80211/phy*/mt76/vow_atf` — and the setting is **not**
+persistent across reboot or Wi-Fi restart (re-apply from a hotplug/init hook if
+needed). The fork also adds a sibling `…/mt76/vow` file (patch `9999-07`) for finer
+VoW tuning (WATF per-level quantum, per-station DRR quantum, deficit bound, dumps);
+`vow_atf` is the plain on/off switch.
 
 ## Download
 
