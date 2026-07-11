@@ -56,6 +56,12 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   two backported RSA-PSS patches now included upstream.
 - **dropbear → `2026.92`** (PR 24113) — latest stable; removes previously
   cherry-picked patches, adds the ecdsa-curve-identifier out-of-bounds-read fix.
+- **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
+  bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
+  (added to filogic default packages), firewall4 bridge-flowtable support, and a
+  filogic hotplug script reloading the firewall on bridge-port add. Local note:
+  the series' refresh of `hack-6.18/650-…xt_FLOWOFFLOAD…` supersedes this fork's
+  offset-only tweaks to the same file (PR side taken).
 
 ### Configuration flags (MTK extensions)
 
