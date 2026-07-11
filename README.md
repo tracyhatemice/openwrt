@@ -51,6 +51,11 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
 - **mac80211** — `subsys/390-mac80211-defer-ap-side-ft-key-upload`
   (PR 23181): defers AP-side FT key upload until station association. Pairs with
   the hostapd `022` FT patch above.
+- **mbedtls → `3.6.7`** (PR 24131) — security release (RSA PKCS#1 v1.5 side
+  channel, TLS 1.2/1.3 handshake fixes, ECC side channel, many CVEs); drops the
+  two backported RSA-PSS patches now included upstream.
+- **dropbear → `2026.92`** (PR 24113) — latest stable; removes previously
+  cherry-picked patches, adds the ecdsa-curve-identifier out-of-bounds-read fix.
 
 ### Configuration flags (MTK extensions)
 
