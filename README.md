@@ -32,7 +32,7 @@ Notes:
 - Imported patches apply cleanly on backports 6.18.26 and build `kmod-mac80211` /
   `kmod-cfg80211` for `mediatek/filogic`.
 - Everything else under `package/kernel/mac80211/patches/` is unchanged from vanilla;
-  the `mtk/` directory (plus the cherry-picked `subsys/390-…-defer-ap-side-ft-key-upload`
+  the `mtk/` directory (plus the cherry-picked `subsys/400-…-defer-ap-side-ft-key-upload`
   FT patch, see below) is the only addition.
 - The feed's default `unified/.../25.12/` profile targets mt7996 / WiFi-7 and is **not**
   used here; the GL-MT6000 uses the mt7915 / WiFi-6 patch set.
@@ -48,14 +48,12 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   Also adds fork base patch `patches/022-hostapd-ft-readd-unassociated-sta-before-ptk`
   (802.11r FT). The security-advisory-2026-1 backports vanilla carries (PR 24043)
   are dropped by the bump itself — 2026-07-09 has those fixes in-source.
-- **mac80211** — `subsys/390-mac80211-defer-ap-side-ft-key-upload`
-  (PR 23181): defers AP-side FT key upload until station association. Pairs with
-  the hostapd `022` FT patch above.
+- **mac80211** — `subsys/400-mac80211-defer-ap-side-ft-key-upload`
+  (PR 23181, in sync with the PR): defers AP-side FT key upload until station
+  association. Pairs with the hostapd `022` FT patch above.
 - **mbedtls → `3.6.7`** (PR 24131) — security release (RSA PKCS#1 v1.5 side
   channel, TLS 1.2/1.3 handshake fixes, ECC side channel, many CVEs); drops the
   two backported RSA-PSS patches now included upstream.
-- **dropbear → `2026.92`** (PR 24113) — latest stable; removes previously
-  cherry-picked patches, adds the ecdsa-curve-identifier out-of-bounds-read fix.
 - **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
   bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
