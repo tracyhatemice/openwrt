@@ -16,7 +16,7 @@ Subject: [PATCH] wifi: mt76: mt7915: add vendor subcmd EDCCA ctrl
 
 --- a/mt76_connac_mcu.h
 +++ b/mt76_connac_mcu.h
-@@ -1288,6 +1288,7 @@ enum {
+@@ -1325,6 +1325,7 @@ enum {
  	MCU_EXT_CMD_RX_STAT_USER_CTRL = 0xb3,
  	MCU_EXT_CMD_SET_QOS_MAP = 0xb4,
  	MCU_EXT_CMD_CERT_CFG = 0xb7,
@@ -26,7 +26,7 @@ Subject: [PATCH] wifi: mt76: mt7915: add vendor subcmd EDCCA ctrl
  	MCU_EXT_CMD_IPI_HIST_SCAN = 0xc5,
 --- a/mt7915/main.c
 +++ b/mt7915/main.c
-@@ -489,6 +489,9 @@ static int mt7915_config(struct ieee8021
+@@ -497,6 +497,9 @@ static int mt7915_config(struct ieee8021
  			mutex_unlock(&dev->mt76.mutex);
  		}
  #endif
@@ -38,7 +38,7 @@ Subject: [PATCH] wifi: mt76: mt7915: add vendor subcmd EDCCA ctrl
  			return ret;
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -5109,3 +5109,75 @@ int mt7915_mcu_ipi_hist_scan(struct mt79
+@@ -5264,3 +5264,75 @@ int mt7915_mcu_ipi_hist_scan(struct mt79
  
  	return 0;
  }
@@ -116,7 +116,7 @@ Subject: [PATCH] wifi: mt76: mt7915: add vendor subcmd EDCCA ctrl
 +}
 --- a/mt7915/mcu.h
 +++ b/mt7915/mcu.h
-@@ -1075,6 +1075,27 @@ enum {
+@@ -1084,6 +1084,27 @@ enum {
     MURU_DL_INIT,
     MURU_UL_INIT,
  };
@@ -146,7 +146,7 @@ Subject: [PATCH] wifi: mt76: mt7915: add vendor subcmd EDCCA ctrl
  #endif
 --- a/mt7915/mt7915.h
 +++ b/mt7915/mt7915.h
-@@ -819,7 +819,8 @@ void mt7915_vendor_amnt_fill_rx(struct m
+@@ -839,7 +839,8 @@ void mt7915_vendor_amnt_fill_rx(struct m
  int mt7915_vendor_amnt_sta_remove(struct mt7915_phy *phy,
  				  struct ieee80211_sta *sta);
  #endif

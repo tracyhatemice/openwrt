@@ -37,7 +37,7 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  out_put_node:
 --- a/mt76.h
 +++ b/mt76.h
-@@ -801,6 +801,7 @@ struct mt76_testmode_ops {
+@@ -804,6 +804,7 @@ struct mt76_testmode_ops {
  			  enum mt76_testmode_state new_state);
  	int (*dump_stats)(struct mt76_phy *phy, struct sk_buff *msg);
  	int (*set_eeprom)(struct mt76_phy *phy, u32 offset, u8 *val, u8 action);
@@ -47,7 +47,7 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  struct mt76_testmode_entry_data {
 --- a/mt76_connac_mcu.h
 +++ b/mt76_connac_mcu.h
-@@ -1045,6 +1045,7 @@ enum {
+@@ -1071,6 +1071,7 @@ enum {
  
  /* ext event table */
  enum {
@@ -57,7 +57,7 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  	MCU_EXT_EVENT_THERMAL_PROTECT = 0x22,
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -529,6 +529,9 @@ mt7915_mcu_rx_ext_event(struct mt7915_de
+@@ -547,6 +547,9 @@ mt7915_mcu_rx_ext_event(struct mt7915_de
  	case MCU_EXT_EVENT_BF_STATUS_READ:
  		mt7915_tm_txbf_status_read(dev, skb);
  		break;
@@ -69,7 +69,7 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  		mt7915_mcu_rx_bss_acq_pkt_cnt(dev, skb);
 --- a/mt7915/mt7915.h
 +++ b/mt7915/mt7915.h
-@@ -699,6 +699,7 @@ int mt7915_mcu_fw_dbg_ctrl(struct mt7915
+@@ -719,6 +719,7 @@ int mt7915_mcu_fw_dbg_ctrl(struct mt7915
  void mt7915_mcu_rx_event(struct mt7915_dev *dev, struct sk_buff *skb);
  void mt7915_mcu_exit(struct mt7915_dev *dev);
  int mt7915_tm_txbf_status_read(struct mt7915_dev *dev, struct sk_buff *skb);
