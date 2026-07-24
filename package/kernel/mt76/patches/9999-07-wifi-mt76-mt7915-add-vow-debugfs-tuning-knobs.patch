@@ -335,7 +335,7 @@ VoW support lands upstream.
  		debugfs_create_u32("dfs_hw_pattern", 0400, dir,
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -4134,6 +4134,114 @@ int mt7915_mcu_set_vow_band(struct mt791
+@@ -4142,6 +4142,114 @@ int mt7915_mcu_set_vow_band(struct mt791
  				 &req, sizeof(req), false);
  }
  
@@ -498,7 +498,7 @@ VoW support lands upstream.
  };
  
  struct mt7915_vif_cap {
-@@ -510,6 +542,7 @@ struct mt7915_dev {
+@@ -512,6 +544,7 @@ struct mt7915_dev {
  #endif
  
  	struct delayed_work scs_work;
@@ -506,7 +506,7 @@ VoW support lands upstream.
  
  	bool wmm_pbc_enable;
  	struct work_struct wmm_pbc_work;
-@@ -699,6 +732,9 @@ int mt7915_mcu_set_mac(struct mt7915_dev
+@@ -701,6 +734,9 @@ int mt7915_mcu_set_mac(struct mt7915_dev
  int mt7915_mcu_set_test_param(struct mt7915_dev *dev, u8 param, bool test_mode,
  			      u8 en);
  int mt7915_mcu_set_ser(struct mt7915_dev *dev, u8 action, u8 set, u8 band);
