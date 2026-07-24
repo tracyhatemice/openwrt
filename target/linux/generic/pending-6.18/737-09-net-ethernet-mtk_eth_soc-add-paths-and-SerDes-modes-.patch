@@ -597,5 +597,5 @@ Signed-off-by: Daniel Golle <daniel@makrotopia.org>
  int mtk_gmac_rgmii_path_setup(struct mtk_eth *eth, int mac_id);
 +int mtk_gmac_usxgmii_path_setup(struct mtk_eth *eth, int mac_id);
  
- int mtk_eth_offload_init(struct mtk_eth *eth, u8 id);
+ int mtk_eth_offload_init(struct mtk_eth *eth);
  int mtk_eth_setup_tc(struct net_device *dev, enum tc_setup_type type,
