@@ -15,7 +15,7 @@ Signed-off-by: Sujuan Chen <sujuan.chen@mediatek.com>
 
 --- a/mt76_connac.h
 +++ b/mt76_connac.h
-@@ -131,6 +131,7 @@ struct mt76_connac_sta_key_conf {
+@@ -197,6 +197,7 @@ struct mt76_connac_sta_key_conf {
  };
  
  #define MT_TXP_MAX_BUF_NUM		6
@@ -85,7 +85,7 @@ Signed-off-by: Sujuan Chen <sujuan.chen@mediatek.com>
  #define MT7915_CFEND_RATE_DEFAULT	0x49	/* OFDM 24M */
 --- a/wed.c
 +++ b/wed.c
-@@ -167,7 +167,7 @@ void mt76_wed_offload_disable(struct mtk
+@@ -172,7 +172,7 @@ void mt76_wed_offload_disable(struct mtk
  	struct mt76_dev *dev = mt76_wed_to_dev(wed);
  
  	spin_lock_bh(&dev->token_lock);
