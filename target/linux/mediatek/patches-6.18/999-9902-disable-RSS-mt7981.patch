@@ -1,6 +1,6 @@
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -6409,7 +6409,7 @@ static const struct mtk_soc_data mt7981_
+@@ -6412,7 +6412,7 @@ static const struct mtk_soc_data mt7981_
  	.has_accounting = true,
  	.num_tx_queues = 16,
  	.foe_entry_size = MTK_FOE_ENTRY_V2_SIZE,
@@ -11,7 +11,7 @@
  		.dma_max_len = MTK_TX_DMA_BUF_LEN_V2,
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.h
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.h
-@@ -1255,7 +1255,7 @@ enum mkt_eth_capabilities {
+@@ -1252,7 +1252,7 @@ enum mkt_eth_capabilities {
  #define MT7981_CAPS  (MTK_GMAC1_SGMII | MTK_GMAC2_SGMII | MTK_GMAC2_GEPHY | \
  		      MTK_MUX_GMAC12_TO_GEPHY_SGMII | MTK_QDMA | \
  		      MTK_MUX_U3_GMAC23_TO_QPHY | MTK_U3_COPHY_V2 | \
