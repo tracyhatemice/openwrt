@@ -36,6 +36,11 @@ Notes:
   FT patch, see below) is the only addition.
 - The feed's default `unified/.../25.12/` profile targets mt7996 / WiFi-7 and is **not**
   used here; the GL-MT6000 uses the mt7915 / WiFi-6 patch set.
+- Vanilla `hack-6.18/660-fq_codel_defaults` is **dropped** (2026-07-24): it caps
+  fq_codel `memory_limit` at 4 MB on non-x86_64 for small-RAM devices; both targets
+  have 1 GB RAM, so the kernel's 32 MB default is kept. On future rebases an
+  upstream refresh of this patch shows up as a modify/delete conflict — resolve by
+  keeping the deletion.
 
 ### Cherry-picked upstream fixes (on top of the pesa import)
 
