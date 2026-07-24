@@ -41,7 +41,7 @@
  
  	return 0;
 @@ -6286,20 +6305,6 @@ static int mtk_probe(struct platform_dev
- 		}
+ 			goto err_deinit_ppe;
  	}
  
 -	for (i = 0; i < MTK_MAX_DEVS; i++) {
