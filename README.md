@@ -20,7 +20,7 @@ here for provenance and traceability.
 
 | Package | What was imported | From | Upstream origin |
 |---|---|---|---|
-| **kernel / target** (`mediatek/filogic`, 6.18) | 22 MTK patches (`999-*`) added under `target/linux/mediatek/patches-6.18/` (139 total = 117 vanilla + 22 custom) — `mtk_eth_soc` RSS/LRO, jumbo frames, 2.5G rate limit, NAPI tuning; `mtk_wed` (Wireless Ethernet Dispatch) hwrro/SER/cleanup/reset fixes; plus mt7981/mt7986 DTS (RSS irqs, PMU) and USB power control. Pure additions; no vanilla patch modified | pesa1234 `next-r4.8.3.rss.mtk` (synced verbatim) | MediaTek `mtk-openwrt-feeds` `mtk_eth_soc` / WED downstream |
+| **kernel / target** (`mediatek/filogic`, 6.18) | 20 MTK patches (`999-*`) added under `target/linux/mediatek/patches-6.18/` (139 total = 117 vanilla + 2 ported `947`/`954` + 20 pesa) — `mtk_eth_soc` RSS/LRO, jumbo frames, 2.5G rate limit, NAPI tuning; `mtk_wed` (Wireless Ethernet Dispatch) hwrro/SER/cleanup/reset fixes; plus mt7981/mt7986 DTS (RSS irqs, PMU) and USB power control. `999-9911`/`999-9912` dropped 2026-07-24 as byte-identical subsets of the ported `954` (see PPE/WED port below) | pesa1234 `next-r4.8.3.rss.mtk` (synced verbatim) | MediaTek `mtk-openwrt-feeds` `mtk_eth_soc` / WED downstream |
 | **mac80211** | 25 MTK patches into `package/kernel/mac80211/patches/mtk/`, plus 2 lines in `package/kernel/mac80211/Makefile` registering the `mtk/` patch subdir (applied right after `subsys/`) | pesa1234 branch `next-r4.8.3.rss.mtk` (backports **6.18.26**), copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mac80211/patches/subsys/`), which pesa1234 relocates to a `mtk/` subdir |
 | **hostapd** | 25 MTK patches into `package/network/services/hostapd/patches/mtk/`, plus a `Build/Patch` block in `package/network/services/hostapd/Makefile` applying the `mtk/` subdir after the base patches. Same hostapd source as vanilla — bumped to **`2026-07-09`** via cherry-pick PR 24142 (see cherry-picks note below); `mtk/0013` (EDCCA) + `mtk/0016` (iBF) re-anchored for the new base; vanilla base patches untouched apart from one fork-added FT patch (`022-…`) | pesa1234 `next-r4.8.3.rss.mtk`, copied verbatim | MediaTek `mtk-openwrt-feeds` WiFi-6 hostapd set (`autobuild/autobuild_5.4_mac80211_release/.../hostapd/patches`). vs feed: 5 identical, 12 modified (mostly trailer/typo; `0013` EDCCA & `0116` txpower are real rewrites), 8 pesa-original |
 | **mt76** | **92** mt7915 patches in `package/kernel/mt76/patches/` (flat), plus Makefile changes (always-on `CONFIG_NL80211_TESTMODE`, `MAC80211_DEBUGFS`, `Build/Compile`). Source pin on **upstream `openwrt/mt76` `50480826`** (2026-07-24), which ships the newer mt7986 firmware **and native HW ATF/VoW** — so no custom fork is needed. Local deltas vs pesa's stack: `2004-wed-HW-ATF` **dropped** (it duplicated upstream's now-native VoW), its developer tuning knobs re-added on top of upstream as `9999-07-…-add-vow-debugfs-tuning-knobs`; `1032-…-Establish-BA-in-VO-queue` **dropped** (upstream now allows TX aggregation on the VO queue natively); `0000_001-…-load-efuse-data` re-anchored over upstream's new `get_eeprom` bounds check; `1012-…-testmode` re-anchored over upstream's `add_interface` failure-unwind (unwind logic inlined into `init_vif`); `2016-…-refine-twt` shrunk (its mac.c unlink-on-reject hunk is now upstream); `9999-08-…-fix-vow-band-after-init-vif-split` moves upstream's `mt7915_mcu_set_vow_band()` into `init_vif()` after pesa's `1012` splits it out of `add_interface()` (also covers testmode's iBF-cal second vif; adopted from pesa's r4.9.1 807e449d22). See the `vow_atf` runtime note below | pesa1234 `next-r4.8.3.rss.mtk` (patches only; source pin on upstream `openwrt/mt76`, **not** a fork) | MediaTek `mtk-openwrt-feeds` mt7915/WiFi-6 set (`autobuild/autobuild_5.4_mac80211_release/.../mt76/patches`) |
@@ -60,6 +60,20 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   filogic hotplug script reloading the firewall on bridge-port add. Local note:
   the series' refresh of `hack-6.18/650-…xt_FLOWOFFLOAD…` supersedes this fork's
   offset-only tweaks to the same file (PR side taken).
+- **firewall4 bridge-offload hardening** (danpawlik devel branch, commit
+  `683ef23b4d`, follow-up to PR 24038) — pulls `kmod-nft-bridge`/`kmod-nft-netdev`/
+  `kmod-nf-conntrack-bridge` into firewall4 deps, replaces the per-target hotplug
+  scripts with a name-agnostic one shipped by firewall4, guards `hw_ifidx` when
+  `hw_outdev` is NULL and records 802.1AD encaps in `675-10`/`675-12`.
+- **PPE/WED fixes port** (selective, from danpawlik devel commit `16dd825f5e`,
+  originally for BPI-R4/MT7988) — taken: `736-06…11` (PPE MIB-cache enable fix,
+  aging-time alignment, cache preserved-line lock, rhashtable leak fix,
+  nft_flow_offload thoff fix; `736-06` is netsys_v3-gated no-op), mediatek `947`
+  (WED v2 token-FIFO depth fix in txbm reset) and `954` (WED SER fixes: inverted
+  `wdma_rx_reset` ring-skip, hwrro double-free). **Not taken:** RSS `950/951`
+  (duplicate of pesa `999-2710/2711`), PPPQ QoS `952/953` (netsys_v3-only),
+  xfrm/IPsec chain `652`/`676-*`/`948`/`736-12` (unused here), `731` forced-reset
+  (defaults auto-SER off), mt76 mt7996 MLD fix (already in the mt76 pin).
 
 ### Configuration flags (MTK extensions)
 
