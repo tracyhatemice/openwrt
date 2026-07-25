@@ -30,7 +30,7 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  struct nf_flow_rule;
  struct flow_offload;
  enum flow_offload_tuple_dir;
-@@ -279,6 +281,11 @@ nf_flow_table_offload_del_cb(struct nf_f
+@@ -285,6 +287,11 @@ nf_flow_table_offload_del_cb(struct nf_f
  void flow_offload_route_init(struct flow_offload *flow,
  			     struct nf_flow_route *route);
  
@@ -42,20 +42,21 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  int flow_offload_add(struct nf_flowtable *flow_table, struct flow_offload *flow);
  void flow_offload_refresh(struct nf_flowtable *flow_table,
  			  struct flow_offload *flow, bool force);
---- a/net/netfilter/nft_flow_offload.c
-+++ b/net/netfilter/nft_flow_offload.c
-@@ -6,6 +6,7 @@
+--- a/net/netfilter/nf_flow_table_path.c
++++ b/net/netfilter/nf_flow_table_path.c
+@@ -5,6 +5,7 @@
+ #include <linux/netlink.h>
  #include <linux/netfilter.h>
- #include <linux/workqueue.h>
  #include <linux/spinlock.h>
 +#include <linux/if_vlan.h>
  #include <linux/netfilter/nf_conntrack_common.h>
  #include <linux/netfilter/nf_tables.h>
  #include <net/ip.h>
-@@ -294,6 +295,134 @@ static int nft_flow_route(const struct n
+@@ -289,3 +290,131 @@ int nft_flow_route(const struct nft_pkti
  	return 0;
  }
- 
+ EXPORT_SYMBOL_GPL(nft_flow_route);
++
 +static int nft_dev_fill_bridge_path(struct flow_offload *flow,
 +				    struct nft_flowtable *ft,
 +				    enum ip_conntrack_dir dir,
@@ -183,11 +184,9 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
 +	return 0;
 +}
 +EXPORT_SYMBOL_GPL(flow_offload_bridge_init);
-+
- static bool nft_flow_offload_skip(struct sk_buff *skb, int family)
- {
- 	if (skb_sec_path(skb))
-@@ -326,6 +455,7 @@ static void nft_flow_offload_eval(const
+--- a/net/netfilter/nft_flow_offload.c
++++ b/net/netfilter/nft_flow_offload.c
+@@ -52,6 +52,7 @@ static void nft_flow_offload_eval(const
  {
  	struct nft_flow_offload *priv = nft_expr_priv(expr);
  	struct nf_flowtable *flowtable = &priv->flowtable->data;
@@ -195,7 +194,7 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  	struct tcphdr _tcph, *tcph = NULL;
  	struct nf_flow_route route = {};
  	enum ip_conntrack_info ctinfo;
-@@ -379,14 +509,21 @@ static void nft_flow_offload_eval(const
+@@ -105,14 +106,21 @@ static void nft_flow_offload_eval(const
  		goto out;
  
  	dir = CTINFO2DIR(ctinfo);
@@ -220,7 +219,7 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  	if (tcph)
  		flow_offload_ct_tcp(ct);
  
-@@ -400,8 +537,10 @@ static void nft_flow_offload_eval(const
+@@ -126,8 +134,10 @@ static void nft_flow_offload_eval(const
  err_flow_add:
  	flow_offload_free(flow);
  err_flow_alloc:

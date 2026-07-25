@@ -18,7 +18,7 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
 
 --- a/include/net/netfilter/nf_flow_table.h
 +++ b/include/net/netfilter/nf_flow_table.h
-@@ -342,6 +342,9 @@ void nf_flow_table_offload_flush_cleanup
+@@ -348,6 +348,9 @@ void nf_flow_table_offload_flush_cleanup
  int nf_flow_table_offload_setup(struct nf_flowtable *flowtable,
  				struct net_device *dev,
  				enum flow_block_command cmd);
