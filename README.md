@@ -64,7 +64,14 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
   filogic hotplug script reloading the firewall on bridge-port add. Local note:
   the series' refresh of `hack-6.18/650-…xt_FLOWOFFLOAD…` supersedes this fork's
-  offset-only tweaks to the same file (PR side taken).
+  offset-only tweaks to the same file (PR side taken). Rebased 2026-07-25 over
+  the 6.18.40 flowtable path-discovery split (path code moved to
+  `net/netfilter/nf_flow_table_path.c`): `675-03/04/12` + `hack-6.18/290`
+  retargeted to the new file, `675-10` split (bridge path builder +
+  `if_vlan.h` include in `nf_flow_table_path.c`, eval hunks stay in
+  `nft_flow_offload.c`) — carried in the "restore fork flowtable stack" commit
+  on top of the verbatim PR 24419 kernel-bump pick; re-diff against PR 24038
+  when its author rebases the series onto 6.18.40+.
 - **firewall4 bridge-offload hardening** (danpawlik devel branch, commit
   `683ef23b4d`, follow-up to PR 24038) — pulls `kmod-nft-bridge`/`kmod-nft-netdev`/
   `kmod-nf-conntrack-bridge` into firewall4 deps, replaces the per-target hotplug
