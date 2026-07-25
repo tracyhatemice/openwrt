@@ -77,9 +77,9 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  	return 0;
  }
  
---- a/net/netfilter/nft_flow_offload.c
-+++ b/net/netfilter/nft_flow_offload.c
-@@ -145,6 +145,16 @@ static void nft_dev_path_info(const stru
+--- a/net/netfilter/nf_flow_table_path.c
++++ b/net/netfilter/nf_flow_table_path.c
+@@ -142,6 +142,16 @@ static void nft_dev_path_info(const stru
  			case DEV_PATH_BR_VLAN_UNTAG_HW:
  				info->ingress_vlans |= BIT(info->num_encaps - 1);
  				break;
