@@ -21,7 +21,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
 
 --- a/net/netfilter/nft_flow_offload.c
 +++ b/net/netfilter/nft_flow_offload.c
-@@ -461,6 +461,7 @@ static void nft_flow_offload_eval(const
+@@ -57,6 +57,7 @@ static void nft_flow_offload_eval(const
  	struct nf_flow_route route = {};
  	enum ip_conntrack_info ctinfo;
  	struct flow_offload *flow;
@@ -29,7 +29,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  	enum ip_conntrack_dir dir;
  	struct nf_conn *ct;
  	int ret;
-@@ -474,7 +475,15 @@ static void nft_flow_offload_eval(const
+@@ -70,7 +71,15 @@ static void nft_flow_offload_eval(const
  
  	switch (ct->tuplehash[IP_CT_DIR_ORIGINAL].tuple.dst.protonum) {
  	case IPPROTO_TCP:
