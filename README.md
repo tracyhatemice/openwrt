@@ -84,15 +84,19 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   copies verified against the feed — his only deltas are an `IS_BUILTIN` guard,
   a switch `default`, the self-contained `TPORT_EIP197_QDMA` define, the proper
   `dst_xfrm()` accessor and typo fixes): hack `652` + pending
-  `676-01/02/03/05` + `736-12` + mediatek `948`. `676-05`/`652` are the only
+  `676-03/05` + `736-12` + mediatek `948`. `676-05`/`652` are the only
   live behavior change (forward-path resolution now also runs for XFRM flows);
   the rest is inline-IPsec groundwork that stays **dormant** — nothing
   registers `mtk_flow_offload_get_cdrt` (needs the feed's EIP-197 inline
-  driver, MT7988-class), `CONFIG_XFRM` is off in both device configs, and
-  `948`'s teardown call compiles out with `nf_flow_table=m`. Caveat if IPsec
-  is ever enabled: `676-01` relaxes FWD-direction policy template checks
-  unconditionally (feed design for inline-decrypted packets that carry no
-  sec_path). Companion: mediatek `402-crypto-inside-secure-avoid-rcu-stall`
+  driver, MT7988-class), and `948`'s teardown call compiles out with
+  `nf_flow_table=m`. Dan's `676-01/02` (feed `999-crypto-04/05`, xfrm
+  packet-mode core changes) were taken 2026-07-25 and **dropped again
+  2026-07-26** before ever shipping: they are only exercised by an EIP-197
+  inline driver (`NETIF_F_HW_ESP` packet offload) that cannot exist on our
+  EIP-97 SoCs, and crypto-04 unconditionally relaxes FWD-direction xfrm
+  policy template checks — undesirable on a software-IPsec server (melee/
+  nebula run strongswan as IKEv2 client+server). Companion: mediatek
+  `402-crypto-inside-secure-avoid-rcu-stall`
   (feed `999-crypto-03`, unmodified) — generic safexcel result-path fix
   (per-request `local_bh` churn + unbounded overflow re-loop) relevant once
   `kmod-crypto-hw-safexcel` accelerates ESP on the EIP-97; the feed's
