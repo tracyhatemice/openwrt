@@ -92,8 +92,8 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
 -	features |= old_features & (NETIF_F_SOFT_FEATURES | NETIF_F_GSO_SOFTWARE);
 +	features |= old_features & (NETIF_F_SOFT_FEATURES | NETIF_F_GSO_SOFTWARE_ALL);
  
- 	return features;
- }
+ 	if (old_features & NETIF_F_HW_ESP)
+ 		features |= NETIF_F_HW_ESP;
 --- a/net/core/sock.c
 +++ b/net/core/sock.c
 @@ -2625,7 +2625,7 @@ void sk_setup_caps(struct sock *sk, stru
