@@ -1,0 +1,64 @@
+---
+[v1] crypto: inside-secure - Avoid RCU stall in result handling
+
+Fix RCU stall warnings by restructuring local_bh_disable/enable calls in
+result handler. Moves local_bh_disable before the loop to avoid excessive
+context switching and reduces RCU stall occurrences during high-throughput
+crypto operations.
+---
+v1: Avoid RCU stall in result handling
+---
+[ported unmodified from mtk-openwrt-feeds 25.12 999-crypto-03 (kernel
+ 6.12) to 6.18; generic result-path fix, applies to EIP-97 (MT7986/
+ MT7981) as well as EIP-197. Companion feed patch 999-crypto-01 is
+ EIP-197-only (minifw + clock-force, MT7988-class) and NOT taken]
+
+--- a/drivers/crypto/inside-secure/safexcel.c
++++ b/drivers/crypto/inside-secure/safexcel.c
+@@ -1024,7 +1024,6 @@ static inline void safexcel_handle_resul
+ 	int ret, i, nreq, ndesc, tot_descs, handled = 0;
+ 	bool should_complete;
+ 
+-handle_results:
+ 	tot_descs = 0;
+ 
+ 	nreq = readl(EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_PROC_COUNT);
+@@ -1033,6 +1032,7 @@ handle_results:
+ 	if (!nreq)
+ 		goto requests_left;
+ 
++	local_bh_disable();
+ 	for (i = 0; i < nreq; i++) {
+ 		req = safexcel_rdr_req_get(priv, ring);
+ 
+@@ -1045,15 +1045,13 @@ handle_results:
+ 			goto acknowledge;
+ 		}
+ 
+-		if (should_complete) {
+-			local_bh_disable();
++		if (should_complete)
+ 			crypto_request_complete(req, ret);
+-			local_bh_enable();
+-		}
+ 
+ 		tot_descs += ndesc;
+ 		handled++;
+ 	}
++	local_bh_enable();
+ 
+ acknowledge:
+ 	if (i)
+@@ -1061,12 +1059,6 @@ acknowledge:
+ 		       (tot_descs * priv->config.rd_offset),
+ 		       EIP197_HIA_RDR(priv, ring) + EIP197_HIA_xDR_PROC_COUNT);
+ 
+-	/* If the number of requests overflowed the counter, try to proceed more
+-	 * requests.
+-	 */
+-	if (nreq == EIP197_xDR_PROC_xD_PKT_MASK)
+-		goto handle_results;
+-
+ requests_left:
+ 	spin_lock_bh(&priv->ring[ring].lock);
+ 
