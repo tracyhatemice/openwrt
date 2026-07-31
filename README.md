@@ -63,8 +63,13 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   retargeted to the new file, `675-10` split (bridge path builder +
   `if_vlan.h` include in `nf_flow_table_path.c`, eval hunks stay in
   `nft_flow_offload.c`) — carried in the "restore fork flowtable stack" commit
-  on top of the verbatim PR 24419 kernel-bump pick; re-diff against PR 24038
-  when its author rebases the series onto 6.18.40+.
+  on top of the verbatim PR 24419 kernel-bump pick. PR 24038's 2026-07-29 v2
+  (head `74d7154fd7`, still pre-6.18.40) was re-diffed 2026-08-01: 11 of 13
+  patches payload-identical to ours; the fork's `675-10`/`675-12` deliberately
+  diverge — they keep danpawlik's hardening (`683ef23b4d`: 802.1AD-aware encap
+  proto recording where v2 hardcodes `ETH_P_8021Q`, and the `hw_outdev` NULL
+  guard v2 lacks). Expect those two files to conflict when the PR merges;
+  keep the fork versions.
 - **firewall4 bridge-offload hardening** (danpawlik devel branch, commit
   `683ef23b4d`, follow-up to PR 24038) — pulls `kmod-nft-bridge`/`kmod-nft-netdev`/
   `kmod-nf-conntrack-bridge` into firewall4 deps, replaces the per-target hotplug
