@@ -23,7 +23,7 @@ keep the same defensive pattern used elsewhere.
 
 --- a/net/netfilter/nf_flow_table_path.c
 +++ b/net/netfilter/nf_flow_table_path.c
-@@ -350,6 +350,7 @@ static int nft_dev_fill_bridge_path(stru
+@@ -351,6 +351,7 @@ static int nft_dev_fill_bridge_path(stru
  	ether_addr_copy(th[dir].tuple.out.h_source, src_ha);
  	ether_addr_copy(th[dir].tuple.out.h_dest, dst_ha);
  	th[dir].tuple.out.ifidx = info.outdev->ifindex;
