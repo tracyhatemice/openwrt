@@ -67,7 +67,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  			/* 2. Reset dma index */
  			wed_w32(dev, MTK_WED_WDMA_RESET_IDX,
  				MTK_WED_WDMA_RESET_IDX_RX_ALL);
-@@ -2124,7 +2138,7 @@ mtk_wed_dma_enable(struct mtk_wed_device
+@@ -2129,7 +2143,7 @@ mtk_wed_dma_enable(struct mtk_wed_device
  			MTK_WED_WDMA_RX_PREF_DDONE2_EN);
  		wed_set(dev, MTK_WED_WDMA_RX_PREF_CFG, MTK_WED_WDMA_RX_PREF_EN);
  
