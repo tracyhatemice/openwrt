@@ -49,6 +49,11 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
 - **mac80211** — `subsys/400-mac80211-defer-ap-side-ft-key-upload`
   (PR 23181, in sync with the PR): defers AP-side FT key upload until station
   association. Pairs with the hostapd `022` FT patch above.
+- **kernel 6.18.45** (PR 24800) and **WED 2.0 WDMA TX hang fix** (PR 24784) —
+  the latter raises the WED v2 WDMA `RESV_BUFF` from 0x40 to 0x80 to avoid a CDM
+  TX FIFO overflow that hangs WDMA TX on **mt7986 and mt7981** (both fork
+  targets); pulled by upstream from `mtk-openwrt-feeds`. Lands as
+  `mediatek/patches-6.18/756-…`, no overlap with the fork's other WED patches.
 - **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
   bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
