@@ -17,7 +17,7 @@ net_device_path->bridge.vlan_id to flow_offload_tuple->out.bridge_vid.
 
 --- a/include/net/netfilter/nf_flow_table.h
 +++ b/include/net/netfilter/nf_flow_table.h
-@@ -148,6 +148,7 @@ struct flow_offload_tuple {
+@@ -149,6 +149,7 @@ struct flow_offload_tuple {
  		struct {
  			u32		ifidx;
  			u32		hw_ifidx;
@@ -25,7 +25,7 @@ net_device_path->bridge.vlan_id to flow_offload_tuple->out.bridge_vid.
  			u8		h_source[ETH_ALEN];
  			u8		h_dest[ETH_ALEN];
  		} out;
-@@ -214,6 +215,7 @@ struct nf_flow_route {
+@@ -215,6 +216,7 @@ struct nf_flow_route {
  		struct {
  			u32			ifindex;
  			u32			hw_ifindex;
@@ -61,9 +61,9 @@ net_device_path->bridge.vlan_id to flow_offload_tuple->out.bridge_vid.
  			info->xmit_type = FLOW_OFFLOAD_XMIT_DIRECT;
  			break;
  		default:
-@@ -236,6 +238,7 @@ static void nft_dev_forward_path(struct
+@@ -238,6 +240,7 @@ static void nft_dev_forward_path(struct
+ 		memcpy(route->tuple[dir].out.h_source, info.h_source, ETH_ALEN);
  		memcpy(route->tuple[dir].out.h_dest, info.h_dest, ETH_ALEN);
- 		route->tuple[dir].out.ifindex = info.outdev->ifindex;
  		route->tuple[dir].out.hw_ifindex = info.hw_outdev->ifindex;
 +		route->tuple[dir].out.bridge_vid = info.bridge_vid;
  		route->tuple[dir].xmit_type = info.xmit_type;

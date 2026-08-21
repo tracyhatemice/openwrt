@@ -19,7 +19,7 @@ Signed-off-by: Felix Fietkau <nbd@nbd.name>
 
 --- a/include/linux/netdevice.h
 +++ b/include/linux/netdevice.h
-@@ -1747,6 +1747,7 @@ enum netdev_priv_flags {
+@@ -1748,6 +1748,7 @@ enum netdev_priv_flags {
  	IFF_L3MDEV_RX_HANDLER		= 1<<29,
  	IFF_NO_ADDRCONF			= BIT_ULL(30),
  	IFF_TX_SKB_NO_LINEAR		= BIT_ULL(31),
