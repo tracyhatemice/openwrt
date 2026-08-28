@@ -49,11 +49,22 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
 - **mac80211** — `subsys/400-mac80211-defer-ap-side-ft-key-upload`
   (PR 23181, in sync with the PR): defers AP-side FT key upload until station
   association. Pairs with the hostapd `022` FT patch above.
-- **kernel 6.18.45** (PR 24800) and **WED 2.0 WDMA TX hang fix** (PR 24784) —
-  the latter raises the WED v2 WDMA `RESV_BUFF` from 0x40 to 0x80 to avoid a CDM
-  TX FIFO overflow that hangs WDMA TX on **mt7986 and mt7981** (both fork
-  targets); pulled by upstream from `mtk-openwrt-feeds`. Lands as
-  `mediatek/patches-6.18/756-…`, no overlap with the fork's other WED patches.
+- **kernel 6.18.45 / .46 / .47** (PR 24800, all three bump commits picked
+  verbatim) plus a fork-local **6.18.48** bump on top (upstream PR has not yet
+  gone past .47). All fork patches apply to .48 with zero fuzz; the refresh
+  adjusted hunk-header line numbers only (`291`, `650`, `736-12`).
+  The .46 pick conflicts on `hack-6.18/650-…xt_FLOWOFFLOAD` — keep OURS (it
+  carries `DEV_PATH_BR_VLAN_KEEP_HW`, which upstream lacks), then
+  `make target/linux/refresh` normalises the hunk headers.
+- **WED 2.0 WDMA TX hang fix** (PR 24784) — raises the WED v2 WDMA `RESV_BUFF`
+  from 0x40 to 0x80 to avoid a CDM TX FIFO overflow that hangs WDMA TX on
+  **mt7986 and mt7981** (both fork targets); pulled by upstream from
+  `mtk-openwrt-feeds`. **Re-synced 2026-08-28:** upstream reworked the PR from a
+  MediaTek target patch into a generic backport, so the fork now carries
+  `generic/backport-{6.12,6.18}/734-v7.3-…RESV_BUFF-…patch` (a verbatim pick of
+  the PR head, so it will auto-drop on merge) and the old
+  `mediatek/patches-6.18/756-…` has been dropped. Keeping the stale 756 would
+  have collided with upstream's 734 at merge time (same change, two paths).
 - **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
   bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
