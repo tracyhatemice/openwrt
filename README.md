@@ -123,6 +123,14 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   `999-crypto-01` (EIP-197 minifw/clock-force, MT7988-class — the fix for the
   AES-GCM drops in upstream issue 21310 on BPi-R4) is **not taken**: its paths
   are inert on EIP-97 and it renames the EIP197 firmware dir for other boards.
+- **openssl 3.5.8** (PR 24915) — security patch release; picked verbatim
+  (single-file `PKG_VERSION`/`PKG_HASH` bump, patch-id identical to the PR head,
+  so it auto-drops on merge). Fixes 10 CVEs (CVE-2026-18798, -63072, -63076,
+  -14456, -14457, -54874, -63073, -63074, -63075, -75803; advisory
+  <https://openssl-library.org/news/secadv/20260825.txt>). Hash independently
+  confirmed against the GitHub release and openssl.org before picking. Matters
+  here because the fork ships openssl-linked `wpad-openssl`, `openvpn-openssl`,
+  `luci-ssl-openssl`, `curl` and `libustream-openssl` on both targets.
 
 ### Configuration flags (MTK extensions)
 
