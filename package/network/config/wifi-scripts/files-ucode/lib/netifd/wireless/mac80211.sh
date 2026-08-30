@@ -112,6 +112,21 @@ function setup_phy(phy, config, data) {
 		system(`iw phy ${phy} set frag ${config.frag}`);
 	if (config.rts)
 		system(`iw phy ${phy} set rts ${config.rts}`);
+
+	/*
+	 * MTK hardware airtime fairness (VoW). Runtime-only debugfs knob;
+	 * "vow_atf" itself is upstream mt76's, patch 9999-07 only adds the sibling "vow" file for finer
+	 * tuning. Left alone when unset so the driver default stands.
+	 */
+	if (config.vow_atf != null) {
+		let path = `/sys/kernel/debug/ieee80211/${phy}/mt76/vow_atf`;
+		let val = config.vow_atf ? "1" : "0";
+		if (fs.access(path, "w")) {
+			log(`Setting VoW ATF for '${phy}' to ${val}`);
+			if (fs.writefile(path, val) == null)
+				log(`Failed to write ${path}`);
+		}
+	}
 }
 
 function iw_htmode(config) {
