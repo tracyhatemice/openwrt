@@ -24,17 +24,23 @@ This preserves the original intent behind the old ASSOC gate while removing
 the FT race that still exists before the AUTH flag is raised on AP-side
 roams.
 
+backports 7.2 note: upstream grew its own pre-association exception in
+ieee80211_add_key() for Enhanced Privacy Protection (EPP) peers. The gate is
+now the conjunction of both exceptions - the key is rejected only when the
+station is neither an EPP peer, nor associated, nor an AP-side pairwise key -
+so the upstream EPP behaviour is left intact.
+
 Signed-off-by: Andrea Covelli <andcov23@gmail.com>
 ---
- net/mac80211/cfg.c      | 24 +++++++++++++--------
+ net/mac80211/cfg.c      | 26 +++++++++++++-------
  net/mac80211/key.c      | 62 +++++++++++++++++++++++++++++++++++++++++++++++++
  net/mac80211/key.h      |  1 +
  net/mac80211/sta_info.c |  4 ++++
- 4 files changed, 82 insertions(+), 9 deletions(-)
+ 4 files changed, 83 insertions(+), 10 deletions(-)
 
 --- a/net/mac80211/cfg.c
 +++ b/net/mac80211/cfg.c
-@@ -655,18 +655,24 @@ static int ieee80211_add_key(struct wiph
+@@ -666,13 +666,20 @@ static int ieee80211_add_key(struct wiph
  		key->conf.flags |= IEEE80211_KEY_FLAG_NO_AUTO_TX;
  
  	if (mac_addr) {
@@ -51,19 +57,28 @@ Signed-off-by: Andrea Covelli <andcov23@gmail.com>
 -		 * using FT, it attempts to set the key before
 -		 * association has completed, this rejects that attempt
 -		 * so it will set the key again after association.
--		 *
--		 * TODO: accept the key if we have a station entry and
--		 *       add it to the device after the station.
 +		 * Fast transition on the AP side can derive and hand over a
 +		 * pairwise PTK before mac80211 marks the station associated.
 +		 * Accept only AP-side pairwise keys before ASSOC; keep the
 +		 * original ASSOC gate for everything else. The deferred
 +		 * upload path will push the key to hardware once the STA
 +		 * reaches ASSOC.
+ 		 *
+ 		 * With (re)association frame encryption enabled, cfg80211
+ 		 * may deliver keys to mac80211 before the station has
+@@ -680,12 +687,11 @@ static int ieee80211_add_key(struct wiph
+ 		 * is an Enhanced Privacy Protection (EPP) peer.
+ 		 * If (re)association frame encryption support is not present,
+ 		 * cfg80211 will not allow key installation in non‑AP STA mode.
+-		 *
+-		 * TODO: accept the key if we have a station entry and
+-		 *	 add it to the device after the station associates.
  		 */
--		if (!sta || !test_sta_flag(sta, WLAN_STA_ASSOC)) {
+-		if (!sta || (!sta->sta.epp_peer &&
+-			     !test_sta_flag(sta, WLAN_STA_ASSOC))) {
 +		if (!sta ||
-+		    (!test_sta_flag(sta, WLAN_STA_ASSOC) &&
++		    (!sta->sta.epp_peer &&
++		     !test_sta_flag(sta, WLAN_STA_ASSOC) &&
 +		     !defer_pairwise_ap)) {
  			ieee80211_key_free_unused(key);
  			return -ENOENT;
@@ -87,9 +102,9 @@ Signed-off-by: Andrea Covelli <andcov23@gmail.com>
 +		       sdata->vif.type == NL80211_IFTYPE_AP_VLAN);
  
  	/*
- 	 * If this is a per-STA GTK, check if it
-@@ -157,6 +161,16 @@ static int ieee80211_key_enable_hw_accel
- 	    !ieee80211_hw_check(&key->local->hw, SUPPORTS_PER_STA_GTK))
+ 	 * Allow installation of a per-STA GTK if per-STA GTK is supported
+@@ -160,6 +164,16 @@ static int ieee80211_key_enable_hw_accel
+ 	      sdata->vif.type == NL80211_IFTYPE_NAN_DATA))
  		goto out_unsupported;
  
 +	/* AP-side FT can install a pairwise key before association completes.
@@ -105,7 +120,7 @@ Signed-off-by: Andrea Covelli <andcov23@gmail.com>
  	if (sta && !sta->uploaded)
  		goto out_unsupported;
  
-@@ -994,6 +1008,54 @@ void ieee80211_reenable_keys(struct ieee
+@@ -997,6 +1011,54 @@ void ieee80211_reenable_keys(struct ieee
  	}
  }
  
@@ -162,7 +177,7 @@ Signed-off-by: Andrea Covelli <andcov23@gmail.com>
  		   struct ieee80211_vif *vif,
 --- a/net/mac80211/key.h
 +++ b/net/mac80211/key.h
-@@ -164,6 +164,7 @@ void ieee80211_free_keys(struct ieee8021
+@@ -165,6 +165,7 @@ void ieee80211_free_keys(struct ieee8021
  			 bool force_synchronize);
  void ieee80211_free_sta_keys(struct ieee80211_local *local,
  			     struct sta_info *sta);
@@ -172,7 +187,7 @@ Signed-off-by: Andrea Covelli <andcov23@gmail.com>
  			       unsigned long del_links_mask,
 --- a/net/mac80211/sta_info.c
 +++ b/net/mac80211/sta_info.c
-@@ -1424,6 +1424,8 @@ static int _sta_info_move_state(struct s
+@@ -1480,6 +1480,8 @@ static int _sta_info_move_state(struct s
  				if (!sta->sta.support_p2p_ps)
  					ieee80211_recalc_p2p_go_ps_allowed(sta->sdata);
  			}
@@ -181,10 +196,10 @@ Signed-off-by: Andrea Covelli <andcov23@gmail.com>
  		} else if (sta->sta_state == IEEE80211_STA_AUTHORIZED) {
  			ieee80211_vif_dec_num_mcast(sta->sdata);
  			clear_bit(WLAN_STA_AUTHORIZED, &sta->_flags);
-@@ -1455,6 +1457,8 @@ static int _sta_info_move_state(struct s
- 			set_bit(WLAN_STA_AUTHORIZED, &sta->_flags);
- 			ieee80211_check_fast_xmit(sta);
+@@ -1515,6 +1517,8 @@ static int _sta_info_move_state(struct s
  			ieee80211_check_fast_rx(sta);
+ 			if (sta->sdata->vif.type == NL80211_IFTYPE_NAN_DATA)
+ 				ieee80211_nan_update_ndi_carrier(sta->sdata);
 +			/* Extra retry if the ASSOC-time AP key upload was too early. */
 +			ieee80211_upload_deferred_ap_sta_keys(sta);
  		}
