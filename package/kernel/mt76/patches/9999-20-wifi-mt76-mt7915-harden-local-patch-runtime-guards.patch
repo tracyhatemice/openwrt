@@ -1,0 +1,82 @@
+mt7915: harden runtime guards in fork-local patches
+
+Three defects introduced by patches this fork carries:
+
+ * 9510-...-get-airtime-from-mcu: mt7915_mcu_rx_bss_acq_pkt_cnt() uses
+   (bitmap & (1 << i)) as the loop *terminator*, so iteration stops at
+   the first unset bit instead of skipping it, silently under-counting
+   per-BSS AC packet counts. It also trusts the event length.
+ * 0012-...-sanity-check-kernel-crash: the mt76_tx() warning path
+   dereferences sta->addr, but sta may be NULL there.
+ * 1008-...-testmode-additional-supports: mt76_testmode_first_entry()
+   can return the list head, and mt76_tm_for_each_entry() dereferences
+   the result without a guard.
+
+Adapted from pesa1234 next-r4.9.2.rss.mtk 9999-07-harden-local-patch-
+runtime-guards (commit 9a330637f4), minus its mt7915_init_vif unwind
+hunk, which upstream mt76 already provides at our pin.
+
+--- a/mt7915/mcu.c
++++ b/mt7915/mcu.c
+@@ -503,12 +503,19 @@ static void
+ mt7915_mcu_rx_bss_acq_pkt_cnt(struct mt7915_dev *dev, struct sk_buff * skb)
+ {
+ 	struct mt7915_mcu_bss_acq_pkt_cnt_event *event = (struct mt7915_mcu_bss_acq_pkt_cnt_event *)skb->data;
+-	u32 bitmap = le32_to_cpu(event->bss_bitmap);
+ 	u64 sum[IEEE80211_NUM_ACS] = {0};
++	u32 bitmap;
+ 	u8 ac_cnt = 0;
+ 	int i, j;
+ 
+-	for (i = 0; (i < BSS_ACQ_PKT_CNT_BSS_NUM) && (bitmap & (1 << i)); ++i) {
++	if (skb->len < sizeof(*event))
++		return;
++
++	bitmap = le32_to_cpu(event->bss_bitmap);
++	for (i = 0; i < BSS_ACQ_PKT_CNT_BSS_NUM; ++i) {
++		if (!(bitmap & BIT(i)))
++			continue;
++
+ 		for (j = IEEE80211_AC_VO; j < IEEE80211_NUM_ACS; ++j)
+ 			sum[j] += le32_to_cpu(event->bss[i].cnt[mt76_connac_lmac_mapping(j)]);
+ 	}
+--- a/tx.c
++++ b/tx.c
+@@ -383,8 +383,13 @@ mt76_tx(struct mt76_phy *phy, struct iee
+ 		head = &wcid->tx_pending;
+ 		
+ 	if (!wcid->tx_pending.prev || !wcid->tx_pending.next) {
+-		dev_warn(phy->dev->dev, "Un-initialized STA %pM wcid %d in mt76_tx\n",
+-			 sta->addr, wcid->idx);
++		if (sta)
++			dev_warn(phy->dev->dev,
++				 "Un-initialized STA %pM wcid %d in mt76_tx\n",
++				 sta->addr, wcid->idx);
++		else
++			dev_warn(phy->dev->dev, "Un-initialized wcid %d in mt76_tx\n",
++				 wcid->idx);
+ 
+ 		ieee80211_free_txskb(phy->hw, skb);
+ 		return;
+--- a/mt76.h
++++ b/mt76.h
+@@ -1633,8 +1633,8 @@ static inline bool mt76_testmode_enabled
+ static inline struct mt76_wcid *
+ mt76_testmode_first_entry(struct mt76_phy *phy)
+ {
+-	if (list_empty(&phy->test.tm_entry_list) && !phy->test.aid)
+-		return &phy->dev->global_wcid;
++	if (list_empty(&phy->test.tm_entry_list))
++		return phy->test.aid ? NULL : &phy->dev->global_wcid;
+ 
+ 	return list_first_entry(&phy->test.tm_entry_list,
+ 				typeof(struct mt76_wcid),
+@@ -1665,7 +1665,7 @@ mt76_testmode_entry_data(struct mt76_phy
+ #define mt76_tm_for_each_entry(phy, wcid, ed)					\
+ 	for (wcid = mt76_testmode_first_entry(phy),				\
+ 	     ed = mt76_testmode_entry_data(phy, wcid);				\
+-	     ((phy->test.aid &&							\
++	     wcid && ed && ((phy->test.aid &&					\
+ 	       !list_entry_is_head(wcid, &phy->test.tm_entry_list, list)) ||	\
+ 	      (!phy->test.aid && wcid == &phy->dev->global_wcid)) && ed;	\
+ 	     wcid = mt76_testmode_next_entry(phy, wcid),			\
