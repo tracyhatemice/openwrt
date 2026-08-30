@@ -20,7 +20,7 @@
  
  #define DEBUGFS_READONLY_FILE(name, buflen, fmt, value...)		\
  static ssize_t name## _read(struct file *file, char __user *userbuf,	\
-@@ -97,18 +98,179 @@ static const struct file_operations ht40
+@@ -118,8 +119,168 @@ static const struct file_operations ht40
  	.llseek = default_llseek,
  };
  
@@ -189,9 +189,11 @@
 +#define DEBUGFS_ADD(name, chmod)						\
 +	debugfs_create_file(#name, chmod, phyd, &rdev->wiphy, &name## _ops)
  
- void cfg80211_debugfs_rdev_add(struct cfg80211_registered_device *rdev)
- {
- 	struct dentry *phyd = rdev->wiphy.debugfsdir;
+ #define DEBUGFS_RADIO_ADD(name, radio_idx)				\
+ 	debugfs_create_file(#name, 0444, radiod,			\
+@@ -132,11 +293,12 @@ void cfg80211_debugfs_rdev_add(struct cf
+ 	struct dentry *radiod;
+ 	u8 i;
  
 -	DEBUGFS_ADD(rts_threshold);
 -	DEBUGFS_ADD(fragmentation_threshold);
@@ -204,6 +206,6 @@
 +	DEBUGFS_ADD(long_retry_limit, 0444);
 +	DEBUGFS_ADD(ht40allow_map, 0444);
 +	DEBUGFS_ADD(dfs_status, 0444);
- }
  
- struct debugfs_read_work {
+ 	for (i = 0; i < rdev->wiphy.n_radio; i++) {
+ 		radiod = rdev->wiphy.radio_cfg[i].radio_debugfsdir;
