@@ -10,16 +10,17 @@
  
  	struct {
  		u32 state;
-@@ -788,5 +790,6 @@ void mt7915_mac_init(struct mt7915_dev *
+@@ -787,6 +789,7 @@ void mt7915_mac_init(struct mt7915_dev *
+ void mt7915_mac_init(struct mt7915_dev *dev);
  u32 mt7915_mac_wtbl_lmac_addr(struct mt7915_dev *dev, u16 wcid, u8 dw);
  bool mt7915_mac_wtbl_update(struct mt7915_dev *dev, int idx, u32 mask);
 +void mt7915_mac_airtime_reset_work(struct work_struct *work);
  void mt7915_mac_reset_counters(struct mt7915_phy *phy);
  void mt7915_mac_cca_stats_reset(struct mt7915_phy *phy);
- void mt7915_mac_enable_nf(struct mt7915_dev *dev, u8 band);
+ void mt7915_mac_enable_nf(struct mt7915_dev *dev, bool ext_phy);
 --- a/mt7915/mac.c
 +++ b/mt7915/mac.c
-@@ -80,5 +80,28 @@ bool mt7915_mac_wtbl_update(struct mt791
+@@ -80,6 +80,29 @@ bool mt7915_mac_wtbl_update(struct mt791
  			 0, 5000);
  }
  
@@ -48,6 +49,7 @@
 +
  u32 mt7915_mac_wtbl_lmac_addr(struct mt7915_dev *dev, u16 wcid, u8 dw)
  {
+ 	mt76_wr(dev, MT_WTBLON_TOP_WDUCR,
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
 @@ -649,8 +649,8 @@ mt7915_mcu_rx_all_sta_info_event(struct
