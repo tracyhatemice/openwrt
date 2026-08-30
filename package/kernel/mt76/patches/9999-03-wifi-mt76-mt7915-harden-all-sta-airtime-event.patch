@@ -9,9 +9,9 @@
  
  	res = (struct mt7915_mcu_all_sta_info_event *)skb->data;
 -	for (i = 0; i < le16_to_cpu(res->sta_num); i++) {
-+	sta_num = le16_to_cpu(res->sta_num);
 +	if (skb->len < sizeof(*res))
 +		return;
++	sta_num = le16_to_cpu(res->sta_num);
 +	if (sta_num > (skb->len - sizeof(*res)) / sizeof(res->airtime[0]))
 +		return;
 +
