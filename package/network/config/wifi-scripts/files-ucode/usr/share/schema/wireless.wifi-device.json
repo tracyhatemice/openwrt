@@ -588,6 +588,10 @@
 			"type": "boolean",
 			"default": true
 		},
+		"vow_atf": {
+			"description": "Hardware airtime fairness / VoW (MediaTek mt76). Writes /sys/kernel/debug/ieee80211/<phy>/mt76/vow_atf at radio setup. Unset leaves the driver default untouched.",
+			"type": "boolean"
+		},
 		"okc": {
 			"description": "Enable Opportunistic Key Caching",
 			"type": "boolean"
