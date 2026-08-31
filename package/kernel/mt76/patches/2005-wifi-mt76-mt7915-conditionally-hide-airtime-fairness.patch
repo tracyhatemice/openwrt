@@ -13,7 +13,7 @@ mt76 feature setup path.
 
 --- a/mac80211.c
 +++ b/mac80211.c
-@@ -458,7 +458,8 @@ mt76_phy_init(struct mt76_phy *phy, stru
+@@ -459,7 +459,8 @@
  			WIPHY_FLAG_AP_UAPSD;
  
  	wiphy_ext_feature_set(wiphy, NL80211_EXT_FEATURE_CQM_RSSI_LIST);
@@ -23,8 +23,8 @@ mt76 feature setup path.
  	wiphy_ext_feature_set(wiphy, NL80211_EXT_FEATURE_AQL);
  
  	if (!wiphy->max_remain_on_channel_duration)
-@@ -695,6 +696,7 @@ mt76_alloc_device(struct device *pdev, u
- 	dev->dev = pdev;
+@@ -697,6 +698,7 @@
+ 	dev->init_wiphy = NULL;
  	dev->drv = drv_ops;
  	dev->dma_dev = pdev;
 +	dev->expose_airtime_fairness = true;
