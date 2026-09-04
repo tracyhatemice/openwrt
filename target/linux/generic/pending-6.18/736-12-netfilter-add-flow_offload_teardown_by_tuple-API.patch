@@ -27,7 +27,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  		       struct sk_buff *skb, unsigned int thoff,
 --- a/net/netfilter/nf_flow_table_core.c
 +++ b/net/netfilter/nf_flow_table_core.c
-@@ -389,6 +389,32 @@ void flow_offload_teardown(struct flow_o
+@@ -390,6 +390,32 @@ void flow_offload_teardown(struct flow_o
  }
  EXPORT_SYMBOL_GPL(flow_offload_teardown);
  
@@ -60,7 +60,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  struct flow_offload_tuple_rhash *
  flow_offload_lookup(struct nf_flowtable *flow_table,
  		    struct flow_offload_tuple *tuple)
-@@ -708,7 +734,7 @@ int nf_flow_table_init(struct nf_flowtab
+@@ -709,7 +735,7 @@ int nf_flow_table_init(struct nf_flowtab
  			   &flowtable->gc_work, HZ);
  
  	mutex_lock(&flowtable_lock);
@@ -69,7 +69,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  	mutex_unlock(&flowtable_lock);
  
  	return 0;
-@@ -753,8 +779,9 @@ EXPORT_SYMBOL_GPL(nf_flow_table_cleanup)
+@@ -754,8 +780,9 @@ EXPORT_SYMBOL_GPL(nf_flow_table_cleanup)
  void nf_flow_table_free(struct nf_flowtable *flow_table)
  {
  	mutex_lock(&flowtable_lock);
