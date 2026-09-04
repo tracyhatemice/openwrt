@@ -49,10 +49,17 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
 - **mac80211** — `subsys/400-mac80211-defer-ap-side-ft-key-upload`
   (PR 23181, in sync with the PR): defers AP-side FT key upload until station
   association. Pairs with the hostapd `022` FT patch above.
-- **kernel 6.18.45 / .46 / .47** (PR 24800, all three bump commits picked
-  verbatim) plus a fork-local **6.18.48** bump on top (upstream PR has not yet
-  gone past .47). All fork patches apply to .48 with zero fuzz; the refresh
-  adjusted hunk-header line numbers only (`291`, `650`, `736-12`).
+- **kernel 6.18.45 → .49** (PR 24800, all five bump commits picked
+  verbatim, patch-id identical to the PR's, so they auto-drop when it
+  merges) plus one fork-local commit, `generic: restore fork patch anchors
+  over the 6.18.48/.49 bumps`, holding the fork side that the verbatim
+  picks cannot carry: hunk-header re-anchoring of `291`, `650` and
+  `736-12`, all three of which sit on `net/netfilter/nf_flow_table_core.c`
+  that `.48` grew by a line. Payload is untouched. `.49` additionally
+  drops two patches upstreamed into that release
+  (`backport-6.18/501-v7.1-ksmbd-harden-file-lifetime…`,
+  `894-v7.3-usb-xhci-handle-port-events…`). All fork patches apply to .49
+  with zero fuzz and a following `make target/linux/refresh` is a no-op.
   The .46 pick conflicts on `hack-6.18/650-…xt_FLOWOFFLOAD` — keep OURS (it
   carries `DEV_PATH_BR_VLAN_KEEP_HW`, which upstream lacks), then
   `make target/linux/refresh` normalises the hunk headers.
