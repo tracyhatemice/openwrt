@@ -105,12 +105,13 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   bails. Expect those files to conflict when the PR merges; keep the fork
   versions.
 - **firewall4 bridge-offload hardening** (danpawlik devel branch, commit
-  `683ef23b4d`, follow-up to PR 24038) — pulls `kmod-nft-bridge`/`kmod-nft-netdev`/
+  `683ef23b4d`, tag `danpawlik-firewall4-bridge-hardening`, follow-up to
+  PR 24038) — pulls `kmod-nft-bridge`/`kmod-nft-netdev`/
   `kmod-nf-conntrack-bridge` into firewall4 deps, replaces the per-target hotplug
   scripts with a name-agnostic one shipped by firewall4, guards `hw_ifidx` when
   `hw_outdev` is NULL and records 802.1AD encaps in `675-10`/`675-12`.
 - **PPE/WED fixes port** (selective, from danpawlik devel commit `16dd825f5e`,
-  originally for BPI-R4/MT7988) — taken: `736-06…11` (PPE MIB-cache enable fix,
+  tag `danpawlik-ppe-wed-port`, originally for BPI-R4/MT7988) — taken: `736-06…11` (PPE MIB-cache enable fix,
   aging-time alignment, cache preserved-line lock, rhashtable leak fix,
   nft_flow_offload thoff fix; `736-06` is netsys_v3-gated no-op), mediatek `947`
   (WED v2 token-FIFO depth fix in txbm reset) and `954` (WED SER fixes: inverted
@@ -158,8 +159,19 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   (16 merge commits, from pesa1234 merging `openwrt:main` rather than
   rebasing), will not reproduce 32/913. The backwards force-update
   would have added the commit that created his `9999-07`, already
-  accounted for here via the `9999-03`/`9999-20` split above. These 32
-  are deliberately skipped:
+  accounted for here via the `9999-03`/`9999-20` split above.
+
+  The two danpawlik commits cited below are pinned by tag for the same
+  reason, and it is no longer hypothetical: `683ef23b4d`
+  (`danpawlik-firewall4-bridge-hardening`) and `16dd825f5e`
+  (`danpawlik-ppe-wed-port`) were rebased out of his repository and are
+  absent from **all 17** of his branches. When this was noticed on
+  2026-09-04 they survived only as dangling objects in this clone, one
+  `git gc` from being unrecoverable; both are now annotated tags pushed
+  to origin. Adding a `danpawlik` remote does **not** substitute for
+  this — the commits cannot be re-fetched from anywhere.
+
+  These 32 are deliberately skipped:
   - `advanced_setup` (`96e05f752f`, `43a7ed27e2`, `8431be6fb6`, `fb585731e1`):
     a ~1065-line filogic init.d script that is mostly SMP-affinity/RPS/USB
     power control. Only its ATF portion is wanted; that is re-implemented as
