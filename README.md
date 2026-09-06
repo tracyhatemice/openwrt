@@ -47,7 +47,7 @@ Notes:
 A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
 
 - **mac80211** — `subsys/400-mac80211-defer-ap-side-ft-key-upload`
-  (PR 23181, in sync with the PR head `75311aa2c8`): defers AP-side FT key
+  (PR 23181, in sync with the PR head `ecd3300a61`): defers AP-side FT key
   upload until station association. Pairs with the hostapd `022` FT patch
   above. The PR was rewritten and re-anchored for backports 7.2 on
   2026-09-04 and this fork re-synced to it, dropping its own 7.2 re-anchor:
@@ -60,7 +60,22 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   excluding `SW_CRYPTO_CONTROL` drivers from deferral outright instead of
   faking driver permission for software crypto. Inert for mt76, which does
   not set that flag, but it removes a latent trap. Applies at zero fuzz and
-  zero offset.
+  zero offset. **Updated again 2026-09-06** (`75311aa2c8` → `ecd3300a61`):
+  before uploading a deferred key the PR now refreshes its `RX_MGMT` and
+  `SPP_AMSDU` flags from the station's association parameters, since those
+  capabilities need not be known at install time — precisely the
+  pre-association window this patch opens. Drivers need `RX_MGMT` to select
+  PMF handling and software CCMP/GCMP uses `SPP_AMSDU` when building
+  authenticated data, so this is load-bearing here: these radios run
+  WPA3/SAE with PMF. That revision also names **mt7915** as the reason not
+  to call drivers before ASSOC (it rejects key installation until
+  `wcid->sta` is set during AUTH-to-ASSOC) and adds `Fixes: 1626e0fa740d`
+  plus a lore link, so it is now headed for the kernel too. This patch is
+  deliberately **not** restructured into a patch-id-identical pick the way
+  the kernel bumps and PR 24943 were: the add commit is 74 deep with a
+  12-file backports-7.2 re-anchor in between, and the PR has been rewritten
+  twice in a week, so the equality would not hold. Expect `rebase --skip`
+  at merge.
 - **kernel 6.18.45 → .49** (PR 24800, all five bump commits picked
   verbatim, patch-id identical to the PR's, so they auto-drop when it
   merges) plus one fork-local commit, `generic: restore fork patch anchors
