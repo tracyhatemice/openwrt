@@ -209,10 +209,13 @@ function device_htmode_append(config) {
 
 			append_vars(config, [ 'ieee80211n', 'ht_coex', 'ht_capab' ]);
 
-			/* MTK: OBSS scan interval when HT coexistence is enabled
-			 * (pesa1234 hardwires obss_interval=300 on ht_coex=1) */
-			if (config.ht_coex)
-				append('obss_interval', 300);
+			/* MTK: OBSS scan interval, emitted only when HT coexistence
+			 * is enabled. Defaults to the 300 this fork used to hardcode,
+			 * but is now overridable per radio. */
+			if (config.ht_coex) {
+				set_default(config, 'obss_interval', 300);
+				append('obss_interval', config.obss_interval);
+			}
 		}
 	}
 
@@ -591,6 +594,11 @@ function generate(config) {
 	 * (lpi_enable=0, sku_idx=0, beacon_dup=1), user-overridable. Keys are
 	 * provided by the imported mtk/ hostapd + mt76 patches. */
 	append_vars(config, [ 'lpi_enable', 'sku_idx', 'beacon_dup' ]);
+
+	/* MTK MU-MIMO control bitmap. No schema default, so append_vars emits
+	 * it only when the user sets it and the driver default otherwise
+	 * stands. hostapd's mtk/0014 parser rejects anything outside 0-15. */
+	append_vars(config, [ 'mu_onoff' ]);
 
 	/* hwmode, channel, op_class, ... */
 	append_vars(config, [ 'hw_mode', 'channel', 'rts_threshold', 'chanlist' ]);
