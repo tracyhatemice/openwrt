@@ -77,7 +77,8 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   twice in a week, so the equality would not hold. Expect `rebase --skip`
   at merge.
 - **kernel 6.18.45 → .50 plus two netfilter fixes** (PR 24800, all eight
-  commits picked verbatim), with a fork-local **6.18.51** on top (the PR
+  commits picked; **six are patch-id identical to the PR and auto-drop on
+  merge, two are not** — see below), with a fork-local **6.18.51** on top (the PR
   is still at .50 and unmerged, so there is nothing to pick). The .51
   bump is kept to the version file alone, with its patch re-anchoring in
   a separate commit, so it stays a candidate for auto-drop should the PR
@@ -100,7 +101,15 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   here (`kmod-ipt-offload` is not selected) but is taken to keep `650`
   in sync with the PR, and taking it made this fork's `652` xfrm patch
   apply with fuzz until refreshed, since `652` builds on the function it
-  edits.
+  edits. **Auto-drop caveat, found 2026-09-12:** the `.50` pick is a
+  22-file `update_kernel.sh` refresh, and our copy lacks the PR's `721` and
+  `731` hunk-header refreshes because this fork's own earlier re-anchoring
+  had already put those two files in the PR's post-refresh state — the
+  3-way merge saw nothing to change and dropped them from the commit. So
+  `.50` is *not* patch-id identical and will need `rebase --skip` at merge,
+  exactly like the `xt_FLOWOFFLOAD` fix (whose `650` carries our
+  `BR_VLAN_KEEP_HW` delta). `.45`–`.49` and the `699` flowtable fix are
+  verified identical and do auto-drop.
 - **WED 2.0 WDMA TX hang fix** (PR 24784) — raises the WED v2 WDMA `RESV_BUFF`
   from 0x40 to 0x80 to avoid a CDM TX FIFO overflow that hangs WDMA TX on
   **mt7986 and mt7981** (both fork targets); pulled by upstream from
