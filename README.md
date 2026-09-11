@@ -140,6 +140,42 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   upstream changes in the range are Cirrus, Qualcomm, AMD, Intel,
   ath12k and MT7925 firmware, none of which is installed here.
   `PKG_HASH` re-verified locally against a fresh download.
+- **bridge FDB roaming flow teardown** (MediaTek official feed 25.12,
+  `999-ppe-08-mtk_ppe-add-roaming-handler.patch`, carried here verbatim as
+  `pending-6.18/736-14-netfilter-nf_flow_table-teardown-flows-on-bridge-FDB-roaming`)
+  — a `SWITCHDEV_FDB_DEL_TO_DEVICE` notifier in `nf_flow_table_core.c` that
+  tears down every `XMIT_DIRECT` flow whose destination MAC just roamed
+  between bridge ports, so the flow is rebuilt for the new port instead of
+  stalling for 30+ s until it expires. Authored by Bo-Cun Chen (MediaTek),
+  v3, based on Chad Monroe's SmartRG patch; the feed filename is v1 history
+  (it began as a `mtk_ppe` handler and became a netfilter-core notifier by
+  v3). **Replaced this fork's `hack-6.18/291` (Eric Woudstra) on
+  2026-09-11** — the two are the same mechanism at the same hook points and
+  cannot coexist. The material gain is on WED: `291` only expedited the GC
+  (`mod_delayed_work(gc, 0)`) and returned while the stale PPE entry could
+  still exist; this one does `flush_delayed_work(gc)` +
+  `nf_flow_table_offload_flush()` and does not return until the hardware
+  destroy has completed. It also skips flows already marked
+  `NF_FLOW_TEARDOWN`, filters local/multicast/bridge-master FDB entries,
+  scopes by netns, is `CONFIG_NET_SWITCHDEV`-guarded, and carries
+  `pr_debug` tracing that `CONFIG_KERNEL_DYNAMIC_DEBUG` can switch on. What
+  was given up is `291`'s ifindex + `bridge_vid` match precision (this one
+  matches on MAC alone) — irrelevant on a single-bridge network, where the
+  worst case is an extra flow rebuild. Two facts decided the swap: pesa1234,
+  the source of our `291` (his `next-r4.8.2.rss.mtk`), has himself dropped
+  `291` for this patch; and the lock ordering was checked rather than
+  trusted — `flowtable_lock` is only ever taken in init/free/cleanup, never
+  on the GC or offload workqueues the handler flushes, so flushing under
+  the mutex cannot deadlock. Sourced from the official feed rather than
+  pesa's `709` copy for two reasons: provenance, and mechanics — the
+  official file anchors on `flow_offload_teardown_by_tuple` (our `736-12`)
+  and applies to this tree at zero fuzz, while pesa's is re-anchored for a
+  tree without `736-12` and fails there. **It must sort after `736-12`**
+  for the same reason, hence `736-14` rather than pesa's `709` (`736-13` is
+  left free so it never aliases danpawlik's declined `teardown_by_eth`).
+  Applying it before `hack-6.18/290` and `650` shifted their anchors;
+  refreshed, hunk headers only. The same-AP-reconnect gap noted against
+  `736-13` is unchanged — this, like `291`, needs an FDB delete event.
 - **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
   bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
