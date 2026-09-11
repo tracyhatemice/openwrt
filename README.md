@@ -77,7 +77,11 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   twice in a week, so the equality would not hold. Expect `rebase --skip`
   at merge.
 - **kernel 6.18.45 → .50 plus two netfilter fixes** (PR 24800, all eight
-  commits picked verbatim) plus one fork-local commit,
+  commits picked verbatim), with a fork-local **6.18.51** on top (the PR
+  is still at .50 and unmerged, so there is nothing to pick). The .51
+  bump is kept to the version file alone, with its patch re-anchoring in
+  a separate commit, so it stays a candidate for auto-drop should the PR
+  later carry its own .51 plus one fork-local commit,
   `generic: re-anchor patches over 6.18.50 and the PR 24800 netfilter
   fixes`, holding the hunk-header re-anchoring the verbatim picks cannot
   carry. Two of the eight are not kernel bumps and matter here:
