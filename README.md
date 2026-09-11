@@ -125,6 +125,17 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   `mt7915_mcu_set_vow_band` into that split function), so only the
   `init_vif` form matches. Numbered to match pesa1234's names so future
   syncs against his tree diff cleanly.
+- **linux-firmware 20260910** (PR 25125, picked verbatim, patch-id
+  identical so it auto-drops on merge) — bump from `20260810`. Taken for
+  currency, **not** for any behavioural change: this fork ships only
+  `eip197-mini-firmware` and `mt7986-wo-firmware` out of that package,
+  and all 13 files those install (`inside-secure/eip197_minifw/{ifpp,
+  ipue}.bin` and `mediatek/mt7986_*` including `mt7986_wo_0.bin` /
+  `mt7986_wo_1.bin`) are **byte-identical** across the two releases —
+  verified by extracting both tarballs and comparing hashes. The 65
+  upstream changes in the range are Cirrus, Qualcomm, AMD, Intel,
+  ath12k and MT7925 firmware, none of which is installed here.
+  `PKG_HASH` re-verified locally against a fresh download.
 - **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
   bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
