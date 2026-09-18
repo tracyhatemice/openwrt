@@ -76,40 +76,18 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   12-file backports-7.2 re-anchor in between, and the PR has been rewritten
   twice in a week, so the equality would not hold. Expect `rebase --skip`
   at merge.
-- **kernel 6.18.45 → .50 plus two netfilter fixes** (PR 24800, all eight
-  commits picked; **six are patch-id identical to the PR and auto-drop on
-  merge, two are not** — see below), with a fork-local **6.18.51** on top (the PR
-  is still at .50 and unmerged, so there is nothing to pick). The .51
-  bump is kept to the version file alone, with its patch re-anchoring in
-  a separate commit, so it stays a candidate for auto-drop should the PR
-  later carry its own .51 plus one fork-local commit,
-  `generic: re-anchor patches over 6.18.50 and the PR 24800 netfilter
-  fixes`, holding the hunk-header re-anchoring the verbatim picks cannot
-  carry. Two of the eight are not kernel bumps and matter here:
-  `kernel: netfilter: fix flow offload with an unknown forward path`
-  (`699-…`) restores an output ifindex when the forward path cannot be
-  resolved — `nft_default_forward_path()` never set it, so since 6.18.45
-  such flows were offloaded with ifindex 0 and every packet was dropped
-  and the flow re-offloaded in a loop. Its commit message names this
-  fork's exact configuration: bridged Wi-Fi where mac80211 fails
-  `.ndo_fill_forward_path`, and WED paths ending in `DEV_PATH_MTK_WDMA`,
-  "sporadic packet loss towards wireless clients with software flow
-  offloading enabled on mediatek/filogic". Both devices run
-  `flow_offloading=1` + `flow_offloading_hw=1` on 6.18.49, so they were
-  exposed. The companion `xt_FLOWOFFLOAD: always set the flow output
-  ifindex` fixes the same omission in the iptables target; it is inert
-  here (`kmod-ipt-offload` is not selected) but is taken to keep `650`
-  in sync with the PR, and taking it made this fork's `652` xfrm patch
-  apply with fuzz until refreshed, since `652` builds on the function it
-  edits. **Auto-drop caveat, found 2026-09-12:** the `.50` pick is a
-  22-file `update_kernel.sh` refresh, and our copy lacks the PR's `721` and
-  `731` hunk-header refreshes because this fork's own earlier re-anchoring
-  had already put those two files in the PR's post-refresh state — the
-  3-way merge saw nothing to change and dropped them from the commit. So
-  `.50` is *not* patch-id identical and will need `rebase --skip` at merge,
-  exactly like the `xt_FLOWOFFLOAD` fix (whose `650` carries our
-  `BR_VLAN_KEEP_HW` delta). `.45`–`.49` and the `699` flowtable fix are
-  verified identical and do auto-drop.
+- **kernel bumps and the two netfilter fixes** — **PR 24800 MERGED
+  2026-09-16**, so every commit this fork carried from it is gone: the
+  `.45`–`.49` picks and the `699` flowtable fix auto-dropped, and the
+  `.50`, `.46` and fork-local `.51` bumps were skipped at the rebase
+  because vanilla had already moved past them to **6.18.52**. The
+  `xt_FLOWOFFLOAD` ifindex fix merged too and its `650` is now vanilla's.
+  Nothing from that PR remains as a fork delta. One consequence needed
+  fixing: upstream's `650` restructured the forward-path guard from a
+  single conjunction into two independent tests, and `652` (xfrm-encap,
+  which replaces that guard) was anchored to the old form and failed
+  outright. `652` is re-anchored — see the commit for why the conjunction
+  was *not* a fork delta despite looking like one.
 - **WED 2.0 WDMA TX hang fix** (PR 24784) — raises the WED v2 WDMA `RESV_BUFF`
   from 0x40 to 0x80 to avoid a CDM TX FIFO overflow that hangs WDMA TX on
   **mt7986 and mt7981** (both fork targets); pulled by upstream from
@@ -138,8 +116,11 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   `mt7915_mcu_set_vow_band` into that split function), so only the
   `init_vif` form matches. Numbered to match pesa1234's names so future
   syncs against his tree diff cleanly.
-- **linux-firmware 20260910** (PR 25125, picked verbatim, patch-id
-  identical so it auto-drops on merge) — bump from `20260810`. Taken for
+- **linux-firmware 20260910** — **PR 25125 MERGED 2026-09-12**; the pick
+  auto-dropped at the next rebase and this is no longer a fork delta.
+  Recorded only because the finding still holds: of that package this
+  fork installs just `eip197-mini-firmware` and `mt7986-wo-firmware`,
+  and all 13 files they install were byte-identical across the bump. Taken for
   currency, **not** for any behavioural change: this fork ships only
   `eip197-mini-firmware` and `mt7986-wo-firmware` out of that package,
   and all 13 files those install (`inside-secure/eip197_minifw/{ifpp,
