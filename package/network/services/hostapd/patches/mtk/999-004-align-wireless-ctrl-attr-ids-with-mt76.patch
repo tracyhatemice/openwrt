@@ -1,0 +1,29 @@
+From: Andrea Pesaresi <andreapesaresi82@gmail.com>
+Subject: [PATCH] hostapd: align MTK wireless control attribute IDs with mt76
+
+mt76's mtk_vendor_attr_wireless_ctrl pins MTK_VENDOR_ATTR_WIRELESS_CTRL_CERT
+to 9 (RTS_SIGTA therefore 10), while hostapd's copy of the enum lets CERT
+fall to 8 and RTS_SIGTA to 9. hostapd does not emit either attribute today,
+so the mismatch is latent, but any future SET of RTS_SIGTA from hostapd
+would land on the driver's CERT slot and flip certification mode.
+
+Pin CERT = 9 on the hostapd side too, matching the driver ABI.
+
+Fork note: this is the src/common/mtk_vendor.h hunk of pesa1234's
+999-002-fix-mtk-vendor-control-error-handling (577d51786a); the rest of
+that patch (vendor dump hardening) is not taken.
+---
+ src/common/mtk_vendor.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/src/common/mtk_vendor.h
++++ b/src/common/mtk_vendor.h
+@@ -181,7 +181,7 @@ enum mtk_vendor_attr_wireless_ctrl {
+ 	MTK_VENDOR_ATTR_WIRELESS_CTRL_BA_BUFFER_SIZE,
+ 	MTK_VENDOR_ATTR_WIRELESS_CTRL_MIMO,
+ 	MTK_VENDOR_ATTR_WIRELESS_CTRL_AMSDU,
+-	MTK_VENDOR_ATTR_WIRELESS_CTRL_CERT,
++	MTK_VENDOR_ATTR_WIRELESS_CTRL_CERT = 9,
+ 	MTK_VENDOR_ATTR_WIRELESS_CTRL_RTS_SIGTA,
+ 
+ 	/* keep last */
