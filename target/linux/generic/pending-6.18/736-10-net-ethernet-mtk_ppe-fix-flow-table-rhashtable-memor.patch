@@ -47,7 +47,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  }
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.h
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.h
-@@ -1518,7 +1518,7 @@ int mtk_gmac_2p5gphy_path_setup(struct m
+@@ -1520,7 +1520,7 @@ int mtk_gmac_2p5gphy_path_setup(struct m
  int mtk_gmac_gephy_path_setup(struct mtk_eth *eth, int mac_id);
  int mtk_gmac_rgmii_path_setup(struct mtk_eth *eth, int mac_id);
  
@@ -58,7 +58,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  int mtk_flow_offload_cmd(struct mtk_eth *eth, struct flow_cls_offload *cls,
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -5474,11 +5474,11 @@ static int mtk_probe(struct platform_dev
+@@ -5486,11 +5486,11 @@ static int mtk_probe(struct platform_dev
  				err = -ENOMEM;
  				goto err_deinit_ppe;
  			}

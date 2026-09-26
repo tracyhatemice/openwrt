@@ -809,8 +809,8 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
 +	eth->netdev[id]->irq = eth->irq_fe[MTK_FE_IRQ_SHARED];
  	eth->netdev[id]->dev.of_node = np;
  
- 	phylink = phylink_create(&mac->phylink_config,
-@@ -5806,20 +6083,44 @@ static int mtk_probe(struct platform_dev
+ 	/* LPI wake-up timing is only verified on MTK_GMAC_EEE SoCs */
+@@ -5818,20 +6095,44 @@ static int mtk_probe(struct platform_dev
  			goto err_deinit_hw;
  	}
  
@@ -860,7 +860,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	}
  	if (err)
  		goto err_free_dev;
-@@ -5863,7 +6164,7 @@ static int mtk_probe(struct platform_dev
+@@ -5875,7 +6176,7 @@ static int mtk_probe(struct platform_dev
  		} else
  			netif_info(eth, probe, eth->netdev[i],
  				   "mediatek frame engine at 0x%08lx, irq %d\n",
@@ -869,7 +869,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	}
  
  	/* we run 2 devices on the same DMA ring so we need a dummy device
-@@ -5872,13 +6173,17 @@ static int mtk_probe(struct platform_dev
+@@ -5884,13 +6185,17 @@ static int mtk_probe(struct platform_dev
  	eth->dummy_dev = alloc_netdev_dummy(0);
  	if (!eth->dummy_dev) {
  		err = -ENOMEM;
@@ -891,7 +891,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  
  	platform_set_drvdata(pdev, eth);
  	schedule_delayed_work(&eth->reset.monitor_work,
-@@ -5922,7 +6227,12 @@ static void mtk_remove(struct platform_d
+@@ -5934,7 +6239,12 @@ static void mtk_remove(struct platform_d
  	mtk_hw_deinit(eth);
  
  	netif_napi_del(&eth->tx_napi);
@@ -905,7 +905,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	mtk_cleanup(eth);
  	free_netdev(eth->dummy_dev);
  	mtk_mdio_cleanup(eth);
-@@ -5939,6 +6249,7 @@ static const struct mtk_soc_data mt2701_
+@@ -5951,6 +6261,7 @@ static const struct mtk_soc_data mt2701_
  	.required_pctl = true,
  	.version = 1,
  	.num_tx_queues = 16,
@@ -913,7 +913,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -5948,7 +6259,6 @@ static const struct mtk_soc_data mt2701_
+@@ -5960,7 +6271,6 @@ static const struct mtk_soc_data mt2701_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -921,7 +921,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID,
  		.dma_size = MTK_DMA_SIZE(512),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -5968,6 +6278,7 @@ static const struct mtk_soc_data mt7621_
+@@ -5980,6 +6290,7 @@ static const struct mtk_soc_data mt7621_
  	.hash_offset = 2,
  	.num_tx_queues = 16,
  	.foe_entry_size = MTK_FOE_ENTRY_V1_SIZE,
@@ -929,7 +929,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -5977,7 +6288,6 @@ static const struct mtk_soc_data mt7621_
+@@ -5989,7 +6300,6 @@ static const struct mtk_soc_data mt7621_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -937,7 +937,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID,
  		.dma_size = MTK_DMA_SIZE(512),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -5999,6 +6309,7 @@ static const struct mtk_soc_data mt7622_
+@@ -6011,6 +6321,7 @@ static const struct mtk_soc_data mt7622_
  	.has_accounting = true,
  	.num_tx_queues = 16,
  	.foe_entry_size = MTK_FOE_ENTRY_V1_SIZE,
@@ -945,7 +945,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6008,7 +6319,6 @@ static const struct mtk_soc_data mt7622_
+@@ -6020,7 +6331,6 @@ static const struct mtk_soc_data mt7622_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -953,7 +953,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID,
  		.dma_size = MTK_DMA_SIZE(512),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6029,6 +6339,7 @@ static const struct mtk_soc_data mt7623_
+@@ -6041,6 +6351,7 @@ static const struct mtk_soc_data mt7623_
  	.num_tx_queues = 16,
  	.foe_entry_size = MTK_FOE_ENTRY_V1_SIZE,
  	.disable_pll_modes = true,
@@ -961,7 +961,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6038,7 +6349,6 @@ static const struct mtk_soc_data mt7623_
+@@ -6050,7 +6361,6 @@ static const struct mtk_soc_data mt7623_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -969,7 +969,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID,
  		.dma_size = MTK_DMA_SIZE(512),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6056,6 +6366,7 @@ static const struct mtk_soc_data mt7629_
+@@ -6068,6 +6378,7 @@ static const struct mtk_soc_data mt7629_
  	.has_accounting = true,
  	.version = 1,
  	.num_tx_queues = 16,
@@ -977,7 +977,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6065,7 +6376,6 @@ static const struct mtk_soc_data mt7629_
+@@ -6077,7 +6388,6 @@ static const struct mtk_soc_data mt7629_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -985,7 +985,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID,
  		.dma_size = MTK_DMA_SIZE(512),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6087,6 +6397,7 @@ static const struct mtk_soc_data mt7981_
+@@ -6099,6 +6409,7 @@ static const struct mtk_soc_data mt7981_
  	.has_accounting = true,
  	.num_tx_queues = 16,
  	.foe_entry_size = MTK_FOE_ENTRY_V2_SIZE,
@@ -993,7 +993,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma_v2),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN_V2,
-@@ -6096,7 +6407,6 @@ static const struct mtk_soc_data mt7981_
+@@ -6108,7 +6419,6 @@ static const struct mtk_soc_data mt7981_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -1001,7 +1001,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID_V2,
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
  		.dma_len_offset = 16,
-@@ -6118,16 +6428,16 @@ static const struct mtk_soc_data mt7986_
+@@ -6130,16 +6440,16 @@ static const struct mtk_soc_data mt7986_
  	.has_accounting = true,
  	.num_tx_queues = 16,
  	.foe_entry_size = MTK_FOE_ENTRY_V2_SIZE,
@@ -1020,7 +1020,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID_V2,
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
  		.dma_len_offset = 16,
-@@ -6149,6 +6459,7 @@ static const struct mtk_soc_data mt7987_
+@@ -6161,6 +6471,7 @@ static const struct mtk_soc_data mt7987_
  	.has_accounting = true,
  	.num_tx_queues = 32,
  	.foe_entry_size = MTK_FOE_ENTRY_V3_SIZE,
@@ -1028,7 +1028,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma_v2),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN_V2,
-@@ -6158,11 +6469,10 @@ static const struct mtk_soc_data mt7987_
+@@ -6170,11 +6481,10 @@ static const struct mtk_soc_data mt7987_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma_v2),
@@ -1041,7 +1041,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	},
  };
  
-@@ -6180,6 +6490,7 @@ static const struct mtk_soc_data mt7988_
+@@ -6192,6 +6502,7 @@ static const struct mtk_soc_data mt7988_
  	.has_accounting = true,
  	.num_tx_queues = 32,
  	.foe_entry_size = MTK_FOE_ENTRY_V3_SIZE,
@@ -1049,7 +1049,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma_v2),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN_V2,
-@@ -6189,7 +6500,6 @@ static const struct mtk_soc_data mt7988_
+@@ -6201,7 +6512,6 @@ static const struct mtk_soc_data mt7988_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma_v2),
@@ -1057,7 +1057,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  		.dma_l4_valid = RX_DMA_L4_VALID_V2,
  		.dma_max_len = MTK_TX_DMA_BUF_LEN_V2,
  		.dma_len_offset = 8,
-@@ -6204,6 +6514,7 @@ static const struct mtk_soc_data rt5350_
+@@ -6216,6 +6526,7 @@ static const struct mtk_soc_data rt5350_
  	.required_clks = MT7628_CLKS_BITMAP,
  	.required_pctl = false,
  	.version = 1,
@@ -1065,7 +1065,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	.tx = {
  		DESC_SIZE(struct mtk_tx_dma),
  		.dma_max_len = MTK_TX_DMA_BUF_LEN,
-@@ -6212,7 +6523,6 @@ static const struct mtk_soc_data rt5350_
+@@ -6224,7 +6535,6 @@ static const struct mtk_soc_data rt5350_
  	},
  	.rx = {
  		DESC_SIZE(struct mtk_rx_dma),
@@ -1242,7 +1242,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	MTK_TRGMII_MT7621_CLK_BIT,
  	MTK_QDMA_BIT,
  	MTK_SOC_MT7628_BIT,
-@@ -1075,7 +1132,9 @@ enum mkt_eth_capabilities {
+@@ -1076,7 +1133,9 @@ enum mkt_eth_capabilities {
  #define MTK_INFRA		BIT_ULL(MTK_INFRA_BIT)
  #define MTK_SHARED_SGMII	BIT_ULL(MTK_SHARED_SGMII_BIT)
  #define MTK_HWLRO		BIT_ULL(MTK_HWLRO_BIT)
@@ -1252,12 +1252,12 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  #define MTK_TRGMII_MT7621_CLK	BIT_ULL(MTK_TRGMII_MT7621_CLK_BIT)
  #define MTK_QDMA		BIT_ULL(MTK_QDMA_BIT)
  #define MTK_SOC_MT7628		BIT_ULL(MTK_SOC_MT7628_BIT)
-@@ -1188,24 +1247,25 @@ enum mkt_eth_capabilities {
+@@ -1190,24 +1249,25 @@ enum mkt_eth_capabilities {
  #define MT7981_CAPS  (MTK_GMAC1_SGMII | MTK_GMAC2_SGMII | MTK_GMAC2_GEPHY | \
  		      MTK_MUX_GMAC12_TO_GEPHY_SGMII | MTK_QDMA | \
  		      MTK_MUX_U3_GMAC23_TO_QPHY | MTK_U3_COPHY_V2 | \
--		      MTK_RSTCTRL_PPE1 | MTK_SRAM)
-+		      MTK_RSTCTRL_PPE1 | MTK_SRAM | MTK_PDMA_INT | MTK_RSS)
+-		      MTK_RSTCTRL_PPE1 | MTK_SRAM | MTK_GMAC_EEE)
++		      MTK_RSTCTRL_PPE1 | MTK_SRAM | MTK_GMAC_EEE | MTK_PDMA_INT | MTK_RSS)
  
  #define MT7986_CAPS  (MTK_GMAC1_SGMII | MTK_GMAC2_SGMII | \
  		      MTK_MUX_GMAC12_TO_GEPHY_SGMII | MTK_QDMA | \
@@ -1282,7 +1282,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  
  struct mtk_tx_dma_desc_info {
  	dma_addr_t	addr;
-@@ -1304,6 +1364,7 @@ struct mtk_reg_map {
+@@ -1306,6 +1366,7 @@ struct mtk_reg_map {
  struct mtk_soc_data {
  	const struct mtk_reg_map *reg_map;
  	u32             ana_rgc3;
@@ -1290,7 +1290,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	u64		caps;
  	u64		required_clks;
  	bool		required_pctl;
-@@ -1397,6 +1458,8 @@ struct mtk_eth {
+@@ -1399,6 +1460,8 @@ struct mtk_eth {
  	struct net_device		*netdev[MTK_MAX_DEVS];
  	struct mtk_mac			*mac[MTK_MAX_DEVS];
  	int				irq[MTK_FE_IRQ_NUM];
@@ -1299,7 +1299,7 @@ Subject: [PATCH] net: ethernet: mtk_eth_soc: add rss support
  	u32				msg_enable;
  	unsigned long			sysclk;
  	struct regmap			*ethsys;
-@@ -1410,7 +1473,8 @@ struct mtk_eth {
+@@ -1412,7 +1475,8 @@ struct mtk_eth {
  	struct mtk_rx_ring		rx_ring[MTK_MAX_RX_RING_NUM];
  	struct mtk_rx_ring		rx_ring_qdma;
  	struct napi_struct		tx_napi;
