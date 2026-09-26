@@ -1,4 +1,3 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Andrea Covelli <andcov23@gmail.com>
 Date: Wed, 2 Sep 2026 12:00:00 +0200
 Subject: [PATCH] wifi: mac80211: defer AP-side FT key upload until association
@@ -45,7 +44,7 @@ to be available before association to encrypt and decrypt
 
 Fixes: 1626e0fa740d ("mac80211: fix FT roaming")
 Link: https://github.com/openwrt/openwrt/pull/23181
-Link: https://lore.kernel.org/r/20260904154804.295802-1-andcov23@gmail.com
+Link: https://lore.kernel.org/r/20260905174744.1434165-1-andcov23@gmail.com/
 Signed-off-by: Andrea Covelli <andcov23@gmail.com>
 ---
  net/mac80211/cfg.c      |   22 +++++++++++++++++++---
