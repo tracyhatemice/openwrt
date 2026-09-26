@@ -153,8 +153,8 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  /**
 --- a/src/drivers/driver_nl80211.c
 +++ b/src/drivers/driver_nl80211.c
-@@ -15887,6 +15887,39 @@ static void wpa_driver_nl80211_nan_stop(
- #endif /* CONFIG_NAN */
+@@ -17093,6 +17093,39 @@ static void nl80211_pr_stop(
+ #endif /* CONFIG_PR */
  
  
 +static int nl80211_enable_three_wire(void *priv, const u8 three_wire_enable)
