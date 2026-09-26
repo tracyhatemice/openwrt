@@ -19,7 +19,7 @@ Signed-off-by: SmartWRT <smartwrt@localhost>
 
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -1411,9 +1411,43 @@ static inline int mtk_max_buf_size(int f
+@@ -1433,9 +1433,43 @@ static inline int mtk_max_buf_size(int f
  	return buf_size;
  }
  
@@ -64,7 +64,7 @@ Signed-off-by: SmartWRT <smartwrt@localhost>
  	rxd->rxd2 = READ_ONCE(dma_rxd->rxd2);
  	if (!(rxd->rxd2 & RX_DMA_DONE))
  		return false;
-@@ -1421,11 +1455,8 @@ static bool mtk_rx_get_desc(struct mtk_e
+@@ -1443,11 +1477,8 @@ static bool mtk_rx_get_desc(struct mtk_e
  	rxd->rxd1 = READ_ONCE(dma_rxd->rxd1);
  	rxd->rxd3 = READ_ONCE(dma_rxd->rxd3);
  	rxd->rxd4 = READ_ONCE(dma_rxd->rxd4);
@@ -77,7 +77,7 @@ Signed-off-by: SmartWRT <smartwrt@localhost>
  
  	return true;
  }
-@@ -2518,7 +2549,7 @@ static int mtk_poll_rx(struct napi_struc
+@@ -2540,7 +2571,7 @@ static int mtk_poll_rx(struct napi_struc
  		rxd = ring->dma + RX_DESC_OFS(eth, idx);
  		data = ring->data[idx];
  
