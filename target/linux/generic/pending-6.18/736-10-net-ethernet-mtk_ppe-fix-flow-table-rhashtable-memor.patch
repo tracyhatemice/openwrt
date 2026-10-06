@@ -58,7 +58,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  int mtk_flow_offload_cmd(struct mtk_eth *eth, struct flow_cls_offload *cls,
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -5512,11 +5512,11 @@ static int mtk_probe(struct platform_dev
+@@ -5516,11 +5516,11 @@ static int mtk_probe(struct platform_dev
  				err = -ENOMEM;
  				goto err_deinit_ppe;
  			}
