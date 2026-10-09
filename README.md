@@ -147,6 +147,38 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   Applying it before `hack-6.18/290` and `650` shifted their anchors;
   refreshed, hunk headers only. The same-AP-reconnect gap noted against
   `736-13` is unchanged — this, like `291`, needs an FDB delete event.
+- **flowtable forward-path fix** (PR 25679, one commit, picked 2026-10-09;
+  **not** patch-id identical, see below) — replaces `pending-6.18/699`
+  (which kept a flow offloaded when its forward path could not be
+  discovered and, on 6.18, let it leave with destination
+  `00:00:00:00:00:00` that the bridge then floods) with three upstream
+  backports: `706-01` (`dev_fill_forward_path()` takes a
+  `net_device_path_ctx`), `706-02` (bail out of offloading when the path
+  cannot be discovered; `nft_dev_path_info()`/`nft_dev_forward_path()`
+  return int and `nft_flow_route()` releases the dsts on failure) and
+  `706-03` (`DEV_PATH_IEEE80211` keeps Wi-Fi flows offloaded). The PR
+  also rewrites `hack-6.18/650` (`xt_FLOWOFFLOAD`) the same way. Not a
+  duplicate of PR 24038 — that one adds the bridge flowtable, this one
+  changes how a path-discovery failure is handled — but it rewrites the
+  ground our flowtable stack stands on, so seven fork patches were
+  re-anchored on top of it, payload intent unchanged: `675-03` and `675-04`
+  (the `DEV_PATH_MTK_WDMA` and `BR_VLAN_KEEP_HW` cases now sit beside
+  `DEV_PATH_IEEE80211` and use the bail-out `return -1` style),
+  `675-06` (`dev_fill_bridge_path()` re-split on top of the ctx-based
+  `dev_fill_forward_path()`), `675-10` (the bridge path builder now checks
+  `nft_dev_path_info()`'s return value — with the bail-out semantics a
+  failed walk can leave `info.indev` set, so the old NULL test alone would
+  have offloaded a half-discovered path), `290` (context), and the two
+  xfrm patches `676-05`/`652`, which used to call the forward-path resolver
+  unconditionally: **NEIGH flows now bail like upstream, XFRM flows keep
+  the best-effort resolution** (called for its reverse-ingress bookkeeping,
+  return value ignored), so IPsec offload behaviour is unchanged while
+  plain flows get the fix. `650` keeps our `BR_VLAN_KEEP_HW` case on top of
+  the PR's version (new-file hunk recounted), `721`/`731` hunk headers were
+  ours. Because of those four conflicts the pick cannot auto-drop; expect a
+  `git rebase --skip` plus a re-check of the seven re-anchors when the PR
+  merges.
+
 - **bridge flow offload** (PR 24038, 12-commit series) — `nft_flow_offload`
   bridge fastpath: generic `pending-6.18/675-*` patches, `kmod-nf-conntrack-bridge`
   (added to filogic default packages), firewall4 bridge-flowtable support, and a
@@ -188,7 +220,9 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   a switch `default`, the self-contained `TPORT_EIP197_QDMA` define, the proper
   `dst_xfrm()` accessor and typo fixes): hack `652` + pending
   `676-03/05` + `736-12` + mediatek `948`. `676-05`/`652` are the only
-  live behavior change (forward-path resolution now also runs for XFRM flows);
+  live behavior change (forward-path resolution now also runs for XFRM flows;
+  since PR 25679 that call is best-effort for XFRM while NEIGH flows bail out
+  on failure, see that entry);
   the rest is inline-IPsec groundwork that stays **dormant** — nothing
   registers `mtk_flow_offload_get_cdrt` (needs the feed's EIP-197 inline
   driver, MT7988-class), and `948`'s teardown call compiles out with
@@ -206,6 +240,13 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   `999-crypto-01` (EIP-197 minifw/clock-force, MT7988-class — the fix for the
   AES-GCM drops in upstream issue 21310 on BPi-R4) is **not taken**: its paths
   are inert on EIP-97 and it renames the EIP197 firmware dir for other boards.
+- **libbpf 1.8.0 and bpftool 7.8.0** (PR 25725, two commits picked verbatim;
+  both patch-id identical to the PR head, so they auto-drop at merge) — current
+  releases; bpftool's `003-skip-crypto` patch is upstream in 7.8.0 and dropped,
+  `002-includes` refreshed by the PR author. Consumers here: `libbpf`,
+  `bpftool-full`, `tc-bpf`, `ip-full` and `mimic`. `PKG_HASH`es are checked by
+  the build's download step.
+
 - **Not taken from pesa1234 `next-r4.9.2.rss.mtk`** — 32 of his fork-local
   commits are skipped. The range holds 945 non-merge commits total; the
   other 913 are verbatim vanilla OpenWrt. Reproduce the split with
