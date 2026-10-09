@@ -319,7 +319,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
 +	mt7915_coredump_fw_stack(dev, type, dump, exception);
  
  	/* gather memory content */
- 	dump_mem = (struct mt7915_coredump_mem *)(buf + sofar);
+ 	if (coredump_memdump && crash_data->memdump_buf_len) {
 @@ -356,17 +410,19 @@ static struct mt7915_coredump *mt7915_co
  	return dump;
  }
