@@ -45,7 +45,7 @@ net_device_path->bridge.vlan_id to flow_offload_tuple->out.bridge_vid.
  	case FLOW_OFFLOAD_XMIT_XFRM:
 --- a/net/netfilter/nf_flow_table_path.c
 +++ b/net/netfilter/nf_flow_table_path.c
-@@ -83,6 +83,7 @@ struct nft_forward_info {
+@@ -89,6 +89,7 @@ struct nft_forward_info {
  		__u16	id;
  		__be16	proto;
  	} encap[NF_FLOW_TABLE_ENCAP_MAX];
@@ -53,7 +53,7 @@ net_device_path->bridge.vlan_id to flow_offload_tuple->out.bridge_vid.
  	u8 num_encaps;
  	u8 ingress_vlans;
  	u8 h_source[ETH_ALEN];
-@@ -171,6 +172,7 @@ static void nft_dev_path_info(const stru
+@@ -178,6 +179,7 @@ static int nft_dev_path_info(const struc
  			case DEV_PATH_BR_VLAN_KEEP:
  				break;
  			}
@@ -61,11 +61,11 @@ net_device_path->bridge.vlan_id to flow_offload_tuple->out.bridge_vid.
  			info->xmit_type = FLOW_OFFLOAD_XMIT_DIRECT;
  			break;
  		default:
-@@ -240,6 +242,7 @@ static void nft_dev_forward_path(struct
+@@ -247,6 +249,7 @@ static int nft_dev_forward_path(struct n
  		memcpy(route->tuple[dir].out.h_source, info.h_source, ETH_ALEN);
  		memcpy(route->tuple[dir].out.h_dest, info.h_dest, ETH_ALEN);
  		route->tuple[dir].out.hw_ifindex = info.hw_outdev->ifindex;
 +		route->tuple[dir].out.bridge_vid = info.bridge_vid;
  		route->tuple[dir].xmit_type = info.xmit_type;
  	}
- }
+ 

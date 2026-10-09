@@ -34,7 +34,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  static void mtk_ppe_init_foe_table(struct mtk_ppe *ppe)
 --- a/drivers/net/ethernet/mediatek/mtk_ppe_offload.c
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe_offload.c
-@@ -666,9 +666,7 @@ int mtk_eth_setup_tc(struct net_device *
+@@ -671,9 +671,7 @@ int mtk_eth_setup_tc(struct net_device *
  	}
  }
  
