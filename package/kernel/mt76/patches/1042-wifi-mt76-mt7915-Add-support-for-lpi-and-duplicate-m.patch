@@ -51,7 +51,7 @@ Signed-off-by: Allen Ye <allen.ye@mediatek.com>
  
  	if (dev->region < ARRAY_SIZE(region_names))
  		region_name = region_names[dev->region];
-@@ -269,17 +271,20 @@ mt76_find_power_limits_node(struct mt76_
+@@ -246,19 +248,22 @@ mt76_find_power_limits_node(struct mt76_
  	if (!np)
  		return NULL;
  
@@ -62,7 +62,8 @@ Signed-off-by: Allen Ye <allen.ye@mediatek.com>
 +		struct property *sku_index = of_find_property(cur, "sku-index", NULL);
  
  		if (!country && !regd) {
- 			fallback = cur;
+ 			of_node_put(fallback);
+ 			fallback = of_node_get(cur);
  			continue;
  		}
  
@@ -71,6 +72,7 @@ Signed-off-by: Allen Ye <allen.ye@mediatek.com>
 +		if ((mt76_string_prop_find(country, dev->alpha2) ||
 +		    mt76_string_prop_find(regd, region_name)) &&
 +		    (!phy->sku_idx || mt76_string_prop_find(sku_index, index))) {
+ 			of_node_put(fallback);
  			of_node_put(np);
  			return cur;
  		}
@@ -122,27 +124,27 @@ Signed-off-by: Allen Ye <allen.ye@mediatek.com>
  	MT_TX_FRAG_FIRST,
 --- a/mt76_connac_mac.c
 +++ b/mt76_connac_mac.c
-@@ -600,7 +600,8 @@ void mt76_connac2_mac_write_txwi(struct
- 							vif ? &vif->bss_conf : NULL,
+@@ -601,7 +601,8 @@ void mt76_connac2_mac_write_txwi(struct
  							beacon, multicast);
  		u32 val = MT_TXD6_FIXED_BW;
+ 		u8 spe_idx = mt76_connac_spe_idx(mphy->antenna_mask);
 -
 +		if (dev->phys[band_idx]->beacon_dup)
 +			val |= MT_TX_BW_IDX_80;
  		/* hardware won't add HTC for mgmt/ctrl frame */
  		txwi[2] |= cpu_to_le32(MT_TXD2_HTC_VLD);
  
-@@ -613,7 +614,9 @@ void mt76_connac2_mac_write_txwi(struct
- 
- 			if (!spe_idx)
- 				spe_idx = 24 + phy_idx;
--			txwi[7] |= cpu_to_le32(FIELD_PREP(MT_TXD7_SPE_IDX, spe_idx));
-+			txwi[7] |= cpu_to_le32(FIELD_PREP(MT_TXD7_SPE_IDX,
-+							  dev->phys[band_idx]->mgmt_pwr_enhance ?
-+							  0 : spe_idx));
- 		}
+@@ -620,7 +621,9 @@ void mt76_connac2_mac_write_txwi(struct
+ 		 */
+ 		if (!spe_idx && hweight8(mphy->antenna_mask) > 1)
+ 			spe_idx = 24 + phy_idx;
+-		txwi[7] |= cpu_to_le32(FIELD_PREP(MT_TXD7_SPE_IDX, spe_idx));
++		txwi[7] |= cpu_to_le32(FIELD_PREP(MT_TXD7_SPE_IDX,
++						  dev->phys[band_idx]->mgmt_pwr_enhance ?
++						  0 : spe_idx));
  
  		txwi[7] &= ~cpu_to_le32(MT_TXD7_HW_AMSDU);
+ 	}
 --- a/mt76_connac_mcu.h
 +++ b/mt76_connac_mcu.h
 @@ -1332,6 +1332,7 @@ enum {
