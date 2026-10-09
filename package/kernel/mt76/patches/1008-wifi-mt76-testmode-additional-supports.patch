@@ -411,7 +411,7 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
 +	    !mt76_testmode_enabled(phy->mt76))
  		req.tx_path_num = fls(phy->mt76->antenna_mask);
  
- 	if (phy->mt76->hw->conf.flags & IEEE80211_CONF_MONITOR)
+ 	if (phy->mt76->hw->conf.flags & IEEE80211_CONF_MONITOR &&
 @@ -3031,14 +3038,14 @@ static int mt7915_mcu_set_eeprom_flash(s
  	return 0;
  }

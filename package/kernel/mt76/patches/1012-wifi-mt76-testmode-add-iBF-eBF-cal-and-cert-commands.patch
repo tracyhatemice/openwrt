@@ -152,8 +152,8 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  
  	INIT_LIST_HEAD(&mvif->sta.rc_list);
 @@ -294,17 +286,28 @@ static int mt7915_add_interface(struct i
+ 	mt7915_mcu_add_bss_info(phy, vif, true);
  	mt7915_mcu_add_sta(dev, vif, NULL, CONN_STATE_PORT_SECURE, true);
- 	rcu_assign_pointer(dev->mt76.wcid[idx], &mvif->sta.wcid);
  
 -	mutex_unlock(&dev->mt76.mutex);
 +	return ret;
