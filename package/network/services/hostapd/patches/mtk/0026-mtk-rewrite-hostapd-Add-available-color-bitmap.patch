@@ -4,6 +4,14 @@ Date: Thu, 26 Jan 2023 09:16:00 +0800
 Subject: [PATCH] hostapd: mtk: Add available color bitmap
 
 Signed-off-by: Yi-Chia Hsieh <yi-chia.hsieh@mediatek.com>
+
+Fork note (2026-10-09): upstream 174-ap-keep-the-obss-colors-of-a-radio
+replaced the per-BSS color_collision_bitmap with a per-radio, ageing set
+(struct hostapd_iface bss_colors_in_use). GET_AVAL_COLOR_BMP now feeds the
+colours the driver reports as taken into that set through
+hostapd_bss_colors_collision_event(), so a later colour change avoids them
+for the same 60 s a kernel collision event would, instead of overwriting
+the whole bitmap as before.
 ---
  hostapd/ctrl_iface.c              | 74 +++++++++++++++++++++++++++++++
  hostapd/hostapd_cli.c             | 18 ++++++++
@@ -55,7 +63,7 @@ Signed-off-by: Yi-Chia Hsieh <yi-chia.hsieh@mediatek.com>
 +	u64 aval_color_bmp = 0;
 +
 +	hostapd_drv_get_aval_bss_color_bmp(hapd, &aval_color_bmp);
-+	hapd->color_collision_bitmap = ~aval_color_bmp;
++	hostapd_bss_colors_collision_event(hapd->iface, ~aval_color_bmp);
 +
 +	pos = buf;
 +	end = buf + buflen;
