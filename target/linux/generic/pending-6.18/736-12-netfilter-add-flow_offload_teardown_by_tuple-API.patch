@@ -17,17 +17,17 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
 ---
 --- a/include/net/netfilter/nf_flow_table.h
 +++ b/include/net/netfilter/nf_flow_table.h
-@@ -308,6 +308,7 @@ int nf_flow_table_init(struct nf_flowtab
- void nf_flow_table_free(struct nf_flowtable *flow_table);
+@@ -312,6 +312,7 @@ void nf_flow_table_cleanup(struct net_de
  
- void flow_offload_teardown(struct flow_offload *flow);
+ int nf_flow_table_init(struct nf_flowtable *flow_table);
+ void nf_flow_table_free(struct nf_flowtable *flow_table);
 +void flow_offload_teardown_by_tuple(struct flow_offload_tuple *tuple);
  
- void nf_flow_snat_port(const struct flow_offload *flow,
- 		       struct sk_buff *skb, unsigned int thoff,
+ void flow_offload_teardown(struct flow_offload *flow);
+ 
 --- a/net/netfilter/nf_flow_table_core.c
 +++ b/net/netfilter/nf_flow_table_core.c
-@@ -397,6 +397,32 @@ void flow_offload_teardown(struct flow_o
+@@ -401,6 +401,32 @@ void flow_offload_teardown(struct flow_o
  }
  EXPORT_SYMBOL_GPL(flow_offload_teardown);
  
@@ -60,7 +60,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  struct flow_offload_tuple_rhash *
  flow_offload_lookup(struct nf_flowtable *flow_table,
  		    struct flow_offload_tuple *tuple)
-@@ -716,7 +742,7 @@ int nf_flow_table_init(struct nf_flowtab
+@@ -756,7 +782,7 @@ int nf_flow_table_init(struct nf_flowtab
  			   &flowtable->gc_work, HZ);
  
  	mutex_lock(&flowtable_lock);
@@ -69,7 +69,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  	mutex_unlock(&flowtable_lock);
  
  	return 0;
-@@ -761,8 +787,9 @@ EXPORT_SYMBOL_GPL(nf_flow_table_cleanup)
+@@ -801,8 +827,9 @@ EXPORT_SYMBOL_GPL(nf_flow_table_cleanup)
  void nf_flow_table_free(struct nf_flowtable *flow_table)
  {
  	mutex_lock(&flowtable_lock);

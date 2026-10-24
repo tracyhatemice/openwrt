@@ -33,7 +33,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  	NUM_FLOW_ACTIONS,
  };
  
-@@ -327,6 +329,9 @@ struct flow_action_entry {
+@@ -329,6 +331,9 @@ struct flow_action_entry {
  		struct {				/* FLOW_ACTION_PPPOE_PUSH */
  			u16		sid;
  		} pppoe;

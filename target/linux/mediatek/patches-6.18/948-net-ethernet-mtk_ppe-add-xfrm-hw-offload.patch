@@ -205,7 +205,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  static int
  mtk_flow_set_ipv4_addr(struct mtk_eth *eth, struct mtk_foe_entry *foe,
  		       struct mtk_flow_data *data, bool egress)
-@@ -439,6 +445,14 @@ mtk_flow_offload_replace(struct mtk_eth
+@@ -444,6 +450,14 @@ mtk_flow_offload_replace(struct mtk_eth
  			data.pppoe.sid = act->pppoe.sid;
  			data.pppoe.num++;
  			break;
@@ -220,7 +220,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  		default:
  			return -EOPNOTSUPP;
  		}
-@@ -537,6 +551,11 @@ mtk_flow_offload_replace(struct mtk_eth
+@@ -542,6 +556,11 @@ mtk_flow_offload_replace(struct mtk_eth
  	if (data.pppoe.num == 1)
  		mtk_foe_entry_set_pppoe(eth, &foe, data.pppoe.sid);
  
