@@ -11,6 +11,14 @@ unregister_netdev()), and the removed probe loop now reads
 `goto err_unreg_netdev`, which 6.18.55 uses on register_netdev() failure.
 The reordering, mtk_napi_del() and the dummy_dev cleanup are unchanged.
 
+2026-10-24 (6.18.58): stable now does the reordering itself (dummy device
+and its two NAPI contexts are allocated before the netdevs are registered,
+and the probe error path deletes them and frees the dummy device). What is
+left of this patch is the RSS-aware cleanup: mtk_napi_del() also drops the
+rx_napi[1..3] contexts that 999-2711 adds, used on the probe error path
+(where stable's netif_napi_del(&eth->rx_napi) no longer compiles once
+rx_napi is an array) and in mtk_remove().
+
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 @@ -5194,6 +5194,22 @@ static void mtk_pending_work(struct work
@@ -36,73 +44,19 @@ The reordering, mtk_napi_del() and the dummy_dev cleanup are unchanged.
  static int mtk_free_dev(struct mtk_eth *eth)
  {
  	int i;
-@@ -6332,20 +6348,6 @@ static int mtk_probe(struct platform_dev
- 			goto err_deinit_ppe;
- 	}
- 
--	for (i = 0; i < MTK_MAX_DEVS; i++) {
--		if (!eth->netdev[i])
--			continue;
--
--		err = register_netdev(eth->netdev[i]);
--		if (err) {
--			dev_err(eth->dev, "error bringing up device\n");
--			goto err_unreg_netdev;
--		} else
--			netif_info(eth, probe, eth->netdev[i],
--				   "mediatek frame engine at 0x%08lx, irq %d\n",
--				   eth->netdev[i]->base_addr, eth->irq_fe[MTK_FE_IRQ_SHARED]);
--	}
--
- 	/* we run 2 devices on the same DMA ring so we need a dummy device
- 	 * for NAPI to work
+@@ -6385,9 +6401,9 @@ err_deinit_ppe:
  	 */
-@@ -6353,9 +6355,10 @@ static int mtk_probe(struct platform_dev
- 	if (!eth->dummy_dev) {
- 		err = -ENOMEM;
- 		dev_err(eth->dev, "failed to allocate dummy device\n");
--		goto err_unreg_netdev;
-+		goto err_deinit_ppe;
+ 	cancel_work_sync(&eth->pending_work);
+ 	if (eth->dummy_dev) {
+-		netif_napi_del(&eth->tx_napi);
+-		netif_napi_del(&eth->rx_napi);
++		mtk_napi_del(eth);
+ 		free_netdev(eth->dummy_dev);
++		eth->dummy_dev = NULL;
  	}
--	netif_napi_add_weight(eth->dummy_dev, &eth->tx_napi, mtk_napi_tx, MTK_NAPI_WEIGHT);
-+	netif_napi_add_weight(eth->dummy_dev, &eth->tx_napi, mtk_napi_tx,
-+			      MTK_NAPI_WEIGHT);
- 	netif_napi_add_weight(eth->dummy_dev, &eth->rx_napi[0].napi, mtk_napi_rx,
- 			      MTK_NAPI_WEIGHT);
- 
-@@ -6366,6 +6369,21 @@ static int mtk_probe(struct platform_dev
- 					      mtk_napi_rx, MTK_NAPI_WEIGHT);
- 	}
- 
-+	for (i = 0; i < MTK_MAX_DEVS; i++) {
-+		if (!eth->netdev[i])
-+			continue;
-+
-+		err = register_netdev(eth->netdev[i]);
-+		if (err) {
-+			dev_err(eth->dev, "error bringing up device\n");
-+			goto err_unreg_netdev;
-+		}
-+
-+		netif_info(eth, probe, eth->netdev[i],
-+			   "mediatek frame engine at 0x%08lx, irq %d\n",
-+			   eth->netdev[i]->base_addr, eth->irq_fe[0]);
-+	}
-+
- 	platform_set_drvdata(pdev, eth);
- 	schedule_delayed_work(&eth->reset.monitor_work,
- 			      MTK_DMA_MONITOR_TIMEOUT);
-@@ -6374,6 +6392,9 @@ static int mtk_probe(struct platform_dev
- 
- err_unreg_netdev:
- 	mtk_unreg_dev(eth);
-+	mtk_napi_del(eth);
-+	free_netdev(eth->dummy_dev);
-+	eth->dummy_dev = NULL;
- err_deinit_ppe:
  	mtk_ppe_deinit(eth);
  	mtk_mdio_cleanup(eth);
-@@ -6407,13 +6428,7 @@ static void mtk_remove(struct platform_d
+@@ -6421,13 +6437,7 @@ static void mtk_remove(struct platform_d
  	mtk_wed_exit();
  	mtk_hw_deinit(eth);
  
