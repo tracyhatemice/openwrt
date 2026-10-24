@@ -201,8 +201,8 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
  };
 --- a/src/drivers/driver_nl80211.h
 +++ b/src/drivers/driver_nl80211.h
-@@ -218,6 +218,7 @@ struct wpa_driver_nl80211_data {
- 	unsigned int support_ap_scan:1;
+@@ -225,6 +225,7 @@ struct wpa_driver_nl80211_data {
+ 	unsigned int mesh_handle_dfs:1;
  	unsigned int mtk_edcca_vendor_cmd_avail:1;
  	unsigned int mtk_mu_vendor_cmd_avail:1;
 +	unsigned int mtk_3wire_vendor_cmd_avail:1;

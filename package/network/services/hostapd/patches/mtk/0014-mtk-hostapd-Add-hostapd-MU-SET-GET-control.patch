@@ -403,9 +403,9 @@ Subject: [PATCH 014/149] mtk: hostapd: Add hostapd MU SET/GET control
  #endif /* CONFIG_DPP */
 --- a/src/drivers/driver_nl80211.h
 +++ b/src/drivers/driver_nl80211.h
-@@ -223,6 +223,7 @@ struct wpa_driver_nl80211_data {
- 	unsigned int connect_ext_vendor_cmd_avail:1;
+@@ -224,6 +224,7 @@ struct wpa_driver_nl80211_data {
  	unsigned int support_ap_scan:1;
+ 	unsigned int mesh_handle_dfs:1;
  	unsigned int mtk_edcca_vendor_cmd_avail:1;
 +	unsigned int mtk_mu_vendor_cmd_avail:1;
  
