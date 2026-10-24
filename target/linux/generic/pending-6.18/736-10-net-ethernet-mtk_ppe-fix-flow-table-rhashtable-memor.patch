@@ -73,4 +73,4 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
 +			goto err_deinit_ppe;
  	}
  
- 	for (i = 0; i < MTK_MAX_DEVS; i++) {
+ 	/* we run 2 devices on the same DMA ring so we need a dummy device

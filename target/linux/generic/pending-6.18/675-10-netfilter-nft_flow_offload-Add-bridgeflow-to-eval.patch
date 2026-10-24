@@ -52,7 +52,7 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  #include <linux/netfilter/nf_conntrack_common.h>
  #include <linux/netfilter/nf_tables.h>
  #include <net/ip.h>
-@@ -309,3 +310,132 @@ err_dst_release:
+@@ -310,3 +311,132 @@ err_dst_release:
  	return -ENOENT;
  }
  EXPORT_SYMBOL_GPL(nft_flow_route);
