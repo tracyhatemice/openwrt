@@ -52,8 +52,8 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
  #include <linux/netfilter/nf_conntrack_common.h>
  #include <linux/netfilter/nf_tables.h>
  #include <net/ip.h>
-@@ -290,3 +291,131 @@ int nft_flow_route(const struct nft_pkti
- 	return 0;
+@@ -309,3 +310,132 @@ err_dst_release:
+ 	return -ENOENT;
  }
  EXPORT_SYMBOL_GPL(nft_flow_route);
 +
@@ -97,7 +97,8 @@ Signed-off-by: Eric Woudstra <ericwouds@gmail.com>
 +	if (dev_fill_bridge_path(&ctx, &stack) < 0)
 +		return -1;
 +
-+	nft_dev_path_info(&stack, &info, dst_ha, &ft->data);
++	if (nft_dev_path_info(&stack, &info, dst_ha, &ft->data) < 0)
++		return -1;
 +
 +	if (!info.indev || info.indev != dst_dev)
 +		return -1;
