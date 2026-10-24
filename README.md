@@ -87,6 +87,29 @@ A few upstream OpenWrt changes are cherry-picked on top of the MTK import above:
   which replaces that guard) was anchored to the old form and failed
   outright. `652` is re-anchored — see the commit for why the conjunction
   was *not* a fork delta despite looking like one.
+- **kernel 6.18.58** (PR 25925, picked 2026-10-24: `.56`, `.57`, the
+  `kmod-crypto-krb5` addition for 6.18 rpcsec, `.58`; vanilla was still on
+  `.55`). The four commits applied with the expected collisions only: the
+  PR refreshes `660` and `699`, which this fork deletes (kept deleted), and
+  `650`/`708`, which carry the PR 25679 payload here (kept ours, refreshed
+  for the new tree). Stable `.56`–`.58` changed four areas this fork patches:
+  (1) `nf_flow_table_path.c` rewrote the `DEV_PATH_BR_VLAN_UNTAG` bail-out
+  from `WARN_ON_ONCE(info->num_encaps-- == 0)` to a plain `num_encaps == 0`
+  test plus a separate decrement, so `706-03`'s third hunk is re-anchored on
+  that form (`return -1` replaces the `indev = NULL; break;` as before, the
+  decrement stays); (2) `mtk_eth_soc.c` probe now allocates the dummy
+  device and its two NAPI contexts **before** registering the netdevs and
+  deletes them on the error path — which is exactly what pesa's `999-9910`
+  did, so `9910` is cut down to what stable lacks: the RSS-aware
+  `mtk_napi_del()` (rx rings 1–3 from `2711`), used on the error path (where
+  stable's `netif_napi_del(&eth->rx_napi)` would not compile once `rx_napi`
+  is an array) and in `mtk_remove()`; `736-10`, `2711` (two probe hunks,
+  now in the opposite file order) and `2719` are re-anchored on the moved
+  block, payload unchanged; (3) `nf_flow_table.h`/`_core.c` renamed
+  `NF_FLOW_HW_PENDING` to `NF_FLOW_PENDING` and the GC skips pending flows
+  (offset-only for our patches); (4) `dev.c` grew ~140 lines in the xmit and
+  RX paths (offset-only). Nothing in `.56`–`.58` superseded the mt7530
+  backports `721-03..07` or any other fork patch.
 - **linux-firmware 20260910** — **PR 25125 MERGED 2026-09-12**; the pick
   auto-dropped at the next rebase and this is no longer a fork delta.
   Recorded only because the finding still holds: of that package this
