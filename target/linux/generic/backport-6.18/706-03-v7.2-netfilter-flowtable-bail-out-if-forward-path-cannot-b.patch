@@ -22,7 +22,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
 
 --- a/net/netfilter/nf_flow_table_path.c
 +++ b/net/netfilter/nf_flow_table_path.c
-@@ -94,9 +94,9 @@ struct nft_forward_info {
+@@ -95,9 +95,9 @@ struct nft_forward_info {
  	enum flow_offload_xmit_type xmit_type;
  };
  
@@ -35,7 +35,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  {
  	const struct net_device_path *path;
  	int i;
-@@ -122,10 +122,9 @@ static void nft_dev_path_info(const stru
+@@ -125,10 +125,9 @@ static void nft_dev_path_info(const stru
  			}
  
  			/* DEV_PATH_VLAN and DEV_PATH_PPPOE */
@@ -49,7 +49,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  			if (!info->outdev)
  				info->outdev = path->dev;
  			info->encap[info->num_encaps].id = path->encap.id;
-@@ -140,22 +139,23 @@ static void nft_dev_path_info(const stru
+@@ -143,22 +142,23 @@ static void nft_dev_path_info(const stru
  
  			switch (path->bridge.vlan_mode) {
  			case DEV_PATH_BR_VLAN_UNTAG_HW:
@@ -71,17 +71,17 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  				info->num_encaps++;
  				break;
  			case DEV_PATH_BR_VLAN_UNTAG:
--				if (WARN_ON_ONCE(info->num_encaps-- == 0)) {
+-				if (info->num_encaps == 0) {
 -					info->indev = NULL;
 -					break;
 -				}
-+				if (WARN_ON_ONCE(info->num_encaps-- == 0))
++				if (info->num_encaps == 0)
 +					return -1;
 +
+ 				info->num_encaps--;
  				break;
  			case DEV_PATH_BR_VLAN_KEEP:
- 				break;
-@@ -163,8 +163,7 @@ static void nft_dev_path_info(const stru
+@@ -167,8 +167,7 @@ static void nft_dev_path_info(const stru
  			info->xmit_type = FLOW_OFFLOAD_XMIT_DIRECT;
  			break;
  		default:
@@ -91,7 +91,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  		}
  	}
  	if (!info->outdev)
-@@ -175,6 +174,8 @@ static void nft_dev_path_info(const stru
+@@ -179,6 +178,8 @@ static void nft_dev_path_info(const stru
  	if (nf_flowtable_hw_offload(flowtable) &&
  	    nft_is_valid_ether_device(info->indev))
  		info->xmit_type = FLOW_OFFLOAD_XMIT_DIRECT;
@@ -100,7 +100,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  }
  
  static bool nft_flowtable_find_dev(const struct net_device *dev,
-@@ -194,10 +195,10 @@ static bool nft_flowtable_find_dev(const
+@@ -198,10 +199,10 @@ static bool nft_flowtable_find_dev(const
  	return found;
  }
  
@@ -115,7 +115,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  {
  	const struct dst_entry *dst = route->tuple[dir].dst;
  	struct net_device_path_stack stack;
-@@ -205,15 +206,16 @@ static void nft_dev_forward_path(struct
+@@ -209,15 +210,16 @@ static void nft_dev_forward_path(struct
  	unsigned char ha[ETH_ALEN];
  	int i;
  
@@ -137,7 +137,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  	route->tuple[!dir].in.ifindex = info.indev->ifindex;
  	for (i = 0; i < info.num_encaps; i++) {
  		route->tuple[!dir].in.encap[i].id = info.encap[i].id;
-@@ -228,6 +230,8 @@ static void nft_dev_forward_path(struct
+@@ -232,6 +234,8 @@ static void nft_dev_forward_path(struct
  		route->tuple[dir].out.hw_ifindex = info.hw_outdev->ifindex;
  		route->tuple[dir].xmit_type = info.xmit_type;
  	}
@@ -146,7 +146,7 @@ Signed-off-by: Julius Bairaktaris <julius@bairaktaris.de>
  }
  
  int nft_flow_route(const struct nft_pktinfo *pkt, const struct nf_conn *ct,
-@@ -272,11 +276,19 @@ int nft_flow_route(const struct nft_pkti
+@@ -276,11 +280,19 @@ int nft_flow_route(const struct nft_pkti
  	nft_default_forward_path(route, this_dst, dir);
  	nft_default_forward_path(route, other_dst, !dir);
  
