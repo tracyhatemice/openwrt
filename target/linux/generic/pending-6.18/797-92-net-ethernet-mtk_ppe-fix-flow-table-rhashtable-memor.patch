@@ -15,6 +15,10 @@ Fix by:
 Signed-off-by: chak-kei.lam <chak-kei.lam@mediatek.com>
 [dpawlik: ported from mtk-openwrt-feeds 25.12 999-ppe-33]
 Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
+
+2026-11-01 (fork): renumbered 736-10 -> 797-92 so that upstream's 797-01,
+which quotes the two-argument mtk_eth_offload_init() prototype as context,
+applies unchanged.
 ---
  drivers/net/ethernet/mediatek/mtk_eth_soc.c    | 5 +++--
  drivers/net/ethernet/mediatek/mtk_eth_soc.h    | 2 +-
@@ -24,7 +28,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
 
 --- a/drivers/net/ethernet/mediatek/mtk_ppe.c
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe.c
-@@ -1095,6 +1095,7 @@ void mtk_ppe_deinit(struct mtk_eth *eth)
+@@ -1398,6 +1398,7 @@ void mtk_ppe_deinit(struct mtk_eth *eth)
  			return;
  		rhashtable_destroy(&eth->ppe[i]->l2_flows);
  	}
@@ -34,7 +38,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  static void mtk_ppe_init_foe_table(struct mtk_ppe *ppe)
 --- a/drivers/net/ethernet/mediatek/mtk_ppe_offload.c
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe_offload.c
-@@ -671,9 +671,7 @@ int mtk_eth_setup_tc(struct net_device *
+@@ -815,9 +815,7 @@ int mtk_eth_setup_tc(struct net_device *
  	}
  }
  
@@ -47,18 +51,18 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  }
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.h
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.h
-@@ -1520,7 +1520,7 @@ int mtk_gmac_2p5gphy_path_setup(struct m
- int mtk_gmac_gephy_path_setup(struct mtk_eth *eth, int mac_id);
+@@ -1573,7 +1573,7 @@ int mtk_gmac_gephy_path_setup(struct mtk
  int mtk_gmac_rgmii_path_setup(struct mtk_eth *eth, int mac_id);
+ int mtk_gmac_usxgmii_path_setup(struct mtk_eth *eth, int mac_id);
  
 -int mtk_eth_offload_init(struct mtk_eth *eth, u8 id);
 +int mtk_eth_offload_init(struct mtk_eth *eth);
  int mtk_eth_setup_tc(struct net_device *dev, enum tc_setup_type type,
  		     void *type_data);
- int mtk_flow_offload_cmd(struct mtk_eth *eth, struct flow_cls_offload *cls,
+ void mtk_flow_offload_unbind_wcid(struct mtk_eth *eth, int wed_index, u16 wcid,
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -5516,11 +5516,11 @@ static int mtk_probe(struct platform_dev
+@@ -5725,11 +5725,11 @@ static int mtk_probe(struct platform_dev
  				err = -ENOMEM;
  				goto err_deinit_ppe;
  			}

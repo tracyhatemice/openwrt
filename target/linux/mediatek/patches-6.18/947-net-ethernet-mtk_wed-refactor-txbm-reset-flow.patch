@@ -15,7 +15,7 @@ Signed-off-by: Rex Lu <rex.lu@mediatek.com>
 
 --- a/drivers/net/ethernet/mediatek/mtk_wed.c
 +++ b/drivers/net/ethernet/mediatek/mtk_wed.c
-@@ -1814,21 +1814,32 @@ mtk_wed_reset_dma(struct mtk_wed_device
+@@ -1864,21 +1864,32 @@ mtk_wed_reset_dma(struct mtk_wed_device
  
  	/* 3. reset WED WPDMA tx */
  	wed_clr(dev, MTK_WED_CTRL, MTK_WED_CTRL_WED_TX_FREE_AGENT_EN);

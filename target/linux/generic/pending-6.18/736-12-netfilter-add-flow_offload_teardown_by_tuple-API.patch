@@ -17,7 +17,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
 ---
 --- a/include/net/netfilter/nf_flow_table.h
 +++ b/include/net/netfilter/nf_flow_table.h
-@@ -312,6 +312,7 @@ void nf_flow_table_cleanup(struct net_de
+@@ -313,6 +313,7 @@ void nf_flow_table_cleanup(struct net_de
  
  int nf_flow_table_init(struct nf_flowtable *flow_table);
  void nf_flow_table_free(struct nf_flowtable *flow_table);

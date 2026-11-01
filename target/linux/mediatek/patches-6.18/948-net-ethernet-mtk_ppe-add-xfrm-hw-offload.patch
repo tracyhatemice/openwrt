@@ -22,15 +22,15 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
 
 --- a/drivers/net/ethernet/mediatek/mtk_ppe.c
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe.c
-@@ -12,6 +12,7 @@
+@@ -13,6 +13,7 @@
  #include <net/dst_metadata.h>
  #include <net/dsa.h>
  #include <net/ipv6.h>
 +#include <net/netfilter/nf_flow_table.h>
  
  #include "mtk_eth_soc.h"
- #include "mtk_ppe.h"
-@@ -570,6 +571,28 @@ int mtk_foe_entry_set_pppoe(struct mtk_e
+ #include "mtk_wed.h"
+@@ -572,6 +573,28 @@ int mtk_foe_entry_set_pppoe(struct mtk_e
  	return 0;
  }
  
@@ -59,7 +59,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  int mtk_foe_entry_set_wdma(struct mtk_eth *eth, struct mtk_foe_entry *entry,
  			   int wdma_idx, int txq, int bss, int wcid,
  			   bool amsdu_en)
-@@ -1093,6 +1116,77 @@ err_free_l2_flows:
+@@ -1389,6 +1412,77 @@ err_free_l2_flows:
  	return NULL;
  }
  
@@ -145,10 +145,10 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  
 +#include "mtk_eth_soc.h"
 +
- #define MTK_PPE_ENTRIES_SHIFT		4
- #define MTK_PPE_ENTRIES			(1024 << MTK_PPE_ENTRIES_SHIFT)
- #define MTK_PPE_HASH_MASK		(MTK_PPE_ENTRIES - 1)
-@@ -97,6 +99,17 @@ enum {
+ struct cfg80211_flow_info;
+ 
+ /*
+@@ -108,6 +110,17 @@ enum {
  #define MTK_FOE_WINFO_AMSDU_EN		BIT(24)
  
  #define MTK_FOE_TPORT_IDX		GENMASK(3, 0)
@@ -166,7 +166,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  
  enum {
  	MTK_FOE_STATE_INVALID,
-@@ -399,6 +412,10 @@ int mtk_foe_entry_set_vlan(struct mtk_et
+@@ -416,6 +429,10 @@ int mtk_foe_entry_set_vlan(struct mtk_et
  			   int vid);
  int mtk_foe_entry_set_pppoe(struct mtk_eth *eth, struct mtk_foe_entry *entry,
  			    int sid);
@@ -177,7 +177,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  int mtk_foe_entry_set_wdma(struct mtk_eth *eth, struct mtk_foe_entry *entry,
  			   int wdma_idx, int txq, int bss, int wcid,
  			   bool amsdu_en);
-@@ -410,4 +427,5 @@ int mtk_ppe_debugfs_init(struct mtk_ppe
+@@ -431,4 +448,5 @@ int mtk_ppe_debugfs_init(struct mtk_ppe
  void mtk_foe_entry_get_stats(struct mtk_ppe *ppe, struct mtk_flow_entry *entry,
  			     int *idle);
  
@@ -205,7 +205,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  static int
  mtk_flow_set_ipv4_addr(struct mtk_eth *eth, struct mtk_foe_entry *foe,
  		       struct mtk_flow_data *data, bool egress)
-@@ -444,6 +450,14 @@ mtk_flow_offload_replace(struct mtk_eth
+@@ -447,6 +453,14 @@ mtk_flow_offload_replace(struct mtk_eth
  			data.pppoe.sid = act->pppoe.sid;
  			data.pppoe.num++;
  			break;
@@ -220,7 +220,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  		default:
  			return -EOPNOTSUPP;
  		}
-@@ -542,6 +556,11 @@ mtk_flow_offload_replace(struct mtk_eth
+@@ -545,6 +559,11 @@ mtk_flow_offload_replace(struct mtk_eth
  	if (data.pppoe.num == 1)
  		mtk_foe_entry_set_pppoe(eth, &foe, data.pppoe.sid);
  

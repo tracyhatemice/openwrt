@@ -17,6 +17,11 @@ The fix adds proper cache line locking during cache clear operations:
 Signed-off-by: Bo-Cun Chen <bc-bocun.chen@mediatek.com>
 [dpawlik: ported from mtk-openwrt-feeds 25.12 999-ppe-14]
 Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
+
+2026-11-01 (fork): renumbered 736-09 -> 797-91 so it applies after upstream's
+797-01, which factors the hardware unbind of __mtk_foe_entry_clear() into
+__mtk_foe_entry_unbind(); the BIND-state check before the cache clear now
+lives there. The stray blank-line removal in mtk_ppe.h is dropped.
 ---
  drivers/net/ethernet/mediatek/mtk_ppe.c      | 165 ++++++++++++++++++-
  drivers/net/ethernet/mediatek/mtk_ppe.h      |   3 +-
@@ -25,7 +30,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
 
 --- a/drivers/net/ethernet/mediatek/mtk_ppe.c
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe.c
-@@ -78,6 +78,21 @@ static int mtk_ppe_wait_busy(struct mtk_
+@@ -80,6 +80,21 @@ static int mtk_ppe_wait_busy(struct mtk_
  	return ret;
  }
  
@@ -47,7 +52,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  static int mtk_ppe_mib_wait_busy(struct mtk_ppe *ppe)
  {
  	int ret;
-@@ -141,15 +156,132 @@ struct mtk_foe_accounting *mtk_ppe_mib_e
+@@ -143,15 +158,132 @@ struct mtk_foe_accounting *mtk_ppe_mib_e
  	return acct;
  }
  
@@ -181,30 +186,28 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  
  	ppe_m32(ppe, MTK_PPE_CACHE_CTL, MTK_PPE_CACHE_CTL_EN,
  		enable * MTK_PPE_CACHE_CTL_EN);
-@@ -519,6 +651,7 @@ __mtk_foe_entry_clear(struct mtk_ppe *pp
- 		      bool set_state)
+@@ -681,15 +813,19 @@ static void
+ __mtk_foe_entry_unbind(struct mtk_ppe *ppe, struct mtk_flow_entry *entry)
  {
- 	struct hlist_node *tmp;
+ 	struct mtk_foe_entry *hwe;
 +	int state;
  
- 	if (entry->type == MTK_FLOW_TYPE_L2) {
- 		rhashtable_remove_fast(&ppe->l2_flows, &entry->l2_node,
-@@ -532,10 +665,13 @@ __mtk_foe_entry_clear(struct mtk_ppe *pp
- 	if (entry->hash != 0xffff && set_state) {
- 		struct mtk_foe_entry *hwe = mtk_foe_get_entry(ppe, entry->hash);
+ 	if (entry->hash == 0xffff)
+ 		return;
  
-+		state = FIELD_GET(MTK_FOE_IB1_STATE, hwe->ib1);
+ 	hwe = mtk_foe_get_entry(ppe, entry->hash);
++	state = FIELD_GET(MTK_FOE_IB1_STATE, hwe->ib1);
 +
- 		hwe->ib1 &= ~MTK_FOE_IB1_STATE;
- 		hwe->ib1 |= FIELD_PREP(MTK_FOE_IB1_STATE, MTK_FOE_STATE_INVALID);
- 		dma_wmb();
--		mtk_ppe_cache_clear(ppe);
-+		if (state == MTK_FOE_STATE_BIND)
-+			mtk_ppe_cache_clear(ppe);
- 	}
+ 	hwe->ib1 &= ~MTK_FOE_IB1_STATE;
+ 	hwe->ib1 |= FIELD_PREP(MTK_FOE_IB1_STATE, MTK_FOE_STATE_INVALID);
+ 	dma_wmb();
+-	mtk_ppe_cache_clear(ppe);
++	if (state == MTK_FOE_STATE_BIND)
++		mtk_ppe_cache_clear(ppe);
  	entry->hash = 0xffff;
+ }
  
-@@ -690,8 +826,6 @@ __mtk_foe_entry_commit(struct mtk_ppe *p
+@@ -923,8 +1059,6 @@ __mtk_foe_entry_commit(struct mtk_ppe *p
  		acct->packets = 0;
  		acct->bytes = 0;
  	}
@@ -213,7 +216,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  }
  
  void mtk_foe_entry_clear(struct mtk_ppe *ppe, struct mtk_flow_entry *entry)
-@@ -941,6 +1075,8 @@ struct mtk_ppe *mtk_ppe_init(struct mtk_
+@@ -1244,6 +1378,8 @@ struct mtk_ppe *mtk_ppe_init(struct mtk_
  		ppe->acct_table = acct;
  	}
  
@@ -222,7 +225,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  	mtk_ppe_debugfs_init(ppe, index);
  
  	return ppe;
-@@ -1046,8 +1182,6 @@ void mtk_ppe_start(struct mtk_ppe *ppe)
+@@ -1349,8 +1485,6 @@ void mtk_ppe_start(struct mtk_ppe *ppe)
  	ppe_w32(ppe, MTK_PPE_IP_PROTO_CHK,
  		MTK_PPE_IP_PROTO_CHK_IPV4 | MTK_PPE_IP_PROTO_CHK_IPV6);
  
@@ -231,7 +234,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  	val = MTK_PPE_FLOW_CFG_IP6_3T_ROUTE |
  	      MTK_PPE_FLOW_CFG_IP6_5T_ROUTE |
  	      MTK_PPE_FLOW_CFG_IP6_6RD |
-@@ -1099,6 +1233,8 @@ void mtk_ppe_start(struct mtk_ppe *ppe)
+@@ -1402,6 +1536,8 @@ void mtk_ppe_start(struct mtk_ppe *ppe)
  	}
  	ppe_w32(ppe, MTK_PPE_GLO_CFG, val);
  
@@ -242,7 +245,7 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  	if (mtk_is_netsys_v2_or_greater(ppe->eth)) {
 --- a/drivers/net/ethernet/mediatek/mtk_ppe.h
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe.h
-@@ -342,6 +342,8 @@ struct mtk_ppe {
+@@ -360,6 +360,8 @@ struct mtk_ppe {
  	struct rhashtable l2_flows;
  
  	void *acct_table;
@@ -251,14 +254,6 @@ Signed-off-by: Daniel Pawlik <dpawlik@redhat.com>
  };
  
  struct mtk_ppe *mtk_ppe_init(struct mtk_eth *eth, void __iomem *base, int index);
-@@ -354,7 +356,6 @@ int mtk_ppe_prepare_reset(struct mtk_ppe
- struct mtk_foe_accounting *mtk_ppe_mib_entry_read(struct mtk_ppe *ppe, u16 index);
- 
- void __mtk_ppe_check_skb(struct mtk_ppe *ppe, struct sk_buff *skb, u16 hash);
--
- static inline void
- mtk_ppe_check_skb(struct mtk_ppe *ppe, struct sk_buff *skb, u16 hash)
- {
 --- a/drivers/net/ethernet/mediatek/mtk_ppe_regs.h
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe_regs.h
 @@ -23,6 +23,7 @@
