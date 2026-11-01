@@ -16,7 +16,7 @@ Signed-off-by: Yi-Chia Hsieh <Yi-Chia.Hsieh@mediatek.com>
 
 --- a/mt7915/debugfs.c
 +++ b/mt7915/debugfs.c
-@@ -1433,7 +1433,7 @@ mt7915_twt_stats(struct seq_file *s, voi
+@@ -1422,7 +1422,7 @@ mt7915_twt_stats(struct seq_file *s, voi
  	struct mt7915_dev *dev = dev_get_drvdata(s->private);
  	struct mt7915_twt_flow *iter;
  
@@ -25,7 +25,7 @@ Signed-off-by: Yi-Chia Hsieh <Yi-Chia.Hsieh@mediatek.com>
  
  	seq_puts(s, "     wcid |       id |    flags |      exp | mantissa");
  	seq_puts(s, " | duration |            tsf |\n");
-@@ -1448,7 +1448,7 @@ mt7915_twt_stats(struct seq_file *s, voi
+@@ -1437,7 +1437,7 @@ mt7915_twt_stats(struct seq_file *s, voi
  			iter->exp, iter->mantissa,
  			iter->duration, iter->tsf);
  
@@ -36,7 +36,7 @@ Signed-off-by: Yi-Chia Hsieh <Yi-Chia.Hsieh@mediatek.com>
  }
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -4464,20 +4464,22 @@ int mt7915_mcu_twt_agrt_update(struct mt
+@@ -4494,20 +4494,22 @@ int mt7915_mcu_twt_agrt_update(struct mt
  		.own_mac_idx = mvif->mt76.omac_idx,
  		.flowid = flow->id,
  		.peer_id = cpu_to_le16(flow->wcid),

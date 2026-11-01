@@ -17,7 +17,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
 
 --- a/mt76.h
 +++ b/mt76.h
-@@ -41,6 +41,8 @@
+@@ -37,6 +37,8 @@
  #define MT76_WED_WDS_MIN	256
  #define MT76_WED_WDS_MAX	272
  
@@ -26,7 +26,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  #define MT_QFLAG_WED_RING	GENMASK(1, 0)
  #define MT_QFLAG_WED_TYPE	GENMASK(4, 2)
  #define MT_QFLAG_WED		BIT(5)
-@@ -88,6 +90,12 @@ enum mt76_bus_type {
+@@ -84,6 +86,12 @@ enum mt76_bus_type {
  	MT76_BUS_SDIO,
  };
  
@@ -39,7 +39,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  enum mt76_wed_type {
  	MT76_WED_Q_TX,
  	MT76_WED_Q_TXFREE,
-@@ -958,6 +966,9 @@ struct mt76_dev {
+@@ -965,6 +973,9 @@ struct mt76_dev {
  	struct device *dma_dev;
  
  	struct mt76_mcu mcu;
@@ -51,7 +51,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  	struct net_device *tx_napi_dev;
 --- a/mt76_connac_mcu.c
 +++ b/mt76_connac_mcu.c
-@@ -3165,6 +3165,9 @@ int mt76_connac2_load_ram(struct mt76_de
+@@ -3207,6 +3207,9 @@ int mt76_connac2_load_ram(struct mt76_de
  		goto out;
  	}
  
@@ -61,7 +61,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  	snprintf(dev->hw->wiphy->fw_version,
  		 sizeof(dev->hw->wiphy->fw_version),
  		 "%.10s-%.15s", hdr->fw_ver, hdr->build_date);
-@@ -3194,6 +3197,9 @@ int mt76_connac2_load_ram(struct mt76_de
+@@ -3236,6 +3239,9 @@ int mt76_connac2_load_ram(struct mt76_de
  		goto out;
  	}
  
@@ -71,7 +71,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  	snprintf(dev->hw->wiphy->fw_version,
  		 sizeof(dev->hw->wiphy->fw_version),
  		 "%.10s-%.15s", hdr->fw_ver, hdr->build_date);
-@@ -3297,6 +3303,9 @@ int mt76_connac2_load_patch(struct mt76_
+@@ -3366,6 +3372,9 @@ int mt76_connac2_load_patch(struct mt76_
  	dev_info(dev->dev, "HW/SW Version: 0x%x, Build Time: %.16s",
  		 be32_to_cpu(hdr->hw_sw_ver), hdr->build_date);
  
@@ -320,7 +320,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  
  	/* gather memory content */
  	if (coredump_memdump && crash_data->memdump_buf_len) {
-@@ -356,17 +410,19 @@ static struct mt7915_coredump *mt7915_co
+@@ -357,17 +411,19 @@ static struct mt7915_coredump *mt7915_co
  	return dump;
  }
  
@@ -342,7 +342,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  
  	return 0;
  }
-@@ -374,23 +430,26 @@ int mt7915_coredump_submit(struct mt7915
+@@ -375,23 +431,26 @@ int mt7915_coredump_submit(struct mt7915
  int mt7915_coredump_register(struct mt7915_dev *dev)
  {
  	struct mt7915_crash_data *crash_data;
@@ -384,7 +384,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  		}
  	}
  
-@@ -399,13 +458,20 @@ int mt7915_coredump_register(struct mt79
+@@ -400,13 +459,20 @@ int mt7915_coredump_register(struct mt79
  
  void mt7915_coredump_unregister(struct mt7915_dev *dev)
  {
@@ -512,7 +512,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  }
 --- a/mt7915/mac.c
 +++ b/mt7915/mac.c
-@@ -1602,28 +1602,31 @@ void mt7915_mac_reset_work(struct work_s
+@@ -1603,28 +1603,31 @@ void mt7915_mac_reset_work(struct work_s
  }
  
  /* firmware coredump */
@@ -550,7 +550,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  	if (!mem_region || !crash_data->memdump_buf_len) {
  		mutex_unlock(&dev->dump_mutex);
  		goto skip_memdump;
-@@ -1633,6 +1636,9 @@ void mt7915_mac_dump_work(struct work_st
+@@ -1634,6 +1637,9 @@ void mt7915_mac_dump_work(struct work_st
  	buf_len = crash_data->memdump_buf_len;
  
  	/* dumping memory content... */
@@ -560,7 +560,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  	memset(buf, 0, buf_len);
  	for (i = 0; i < num; i++) {
  		if (mem_region->len > buf_len) {
-@@ -1650,6 +1656,7 @@ void mt7915_mac_dump_work(struct work_st
+@@ -1651,6 +1657,7 @@ void mt7915_mac_dump_work(struct work_st
  		mt7915_memcpy_fromio(dev, buf, mem_region->start,
  				     mem_region->len);
  
@@ -568,7 +568,7 @@ Signed-off-by: Bo Jiao <Bo.Jiao@mediatek.com>
  		hdr->start = mem_region->start;
  		hdr->len = mem_region->len;
  
-@@ -1666,8 +1673,18 @@ void mt7915_mac_dump_work(struct work_st
+@@ -1667,8 +1674,18 @@ void mt7915_mac_dump_work(struct work_st
  	mutex_unlock(&dev->dump_mutex);
  
  skip_memdump:

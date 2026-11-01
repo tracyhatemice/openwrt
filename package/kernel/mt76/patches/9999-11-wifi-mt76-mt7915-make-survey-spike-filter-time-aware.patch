@@ -1,6 +1,6 @@
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -3457,6 +3457,24 @@ out:
+@@ -3479,6 +3479,24 @@ int mt7915_mcu_apply_tx_dpd(struct mt791
  	return 0;
  }
  
@@ -25,7 +25,7 @@
  int mt7915_mcu_get_chan_mib_info(struct mt7915_phy *phy, bool chan_switch)
  {
  	struct mt76_channel_state *state = phy->mt76->chan_state;
-@@ -3465,8 +3483,10 @@ int mt7915_mcu_get_chan_mib_info(struct
+@@ -3487,8 +3505,10 @@ int mt7915_mcu_get_chan_mib_info(struct
  	struct mt7915_mcu_mib *res, req[5];
  	struct sk_buff *skb;
  	static const u32 *offs;
@@ -37,7 +37,7 @@
  
  	/* strict order */
  	if (is_mt7915(&dev->mt76)) {
-@@ -3513,33 +3533,44 @@ int mt7915_mcu_get_chan_mib_info(struct
+@@ -3534,33 +3554,44 @@ int mt7915_mcu_get_chan_mib_info(struct
  	/* subtract Tx backoff time from Tx duration for MT7915 */
  	if (is_mt7915(&dev->mt76)) {
  		u64 backoff = (__res_u64(4) & 0xffff) * 79;  /* 16us + 9us * 7 */

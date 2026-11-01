@@ -1,6 +1,6 @@
 --- a/mt7915/mt7915.h
 +++ b/mt7915/mt7915.h
-@@ -164,6 +164,7 @@ struct mt7915_sta {
+@@ -193,6 +193,7 @@ struct mt7915_sta {
  
  	struct list_head rc_list;
  	u32 airtime_ac[8];
@@ -10,7 +10,7 @@
  	struct ewma_avg_signal avg_ack_signal;
 --- a/mt7915/main.c
 +++ b/mt7915/main.c
-@@ -877,6 +877,7 @@ int mt7915_mac_sta_add(struct mt76_dev *
+@@ -865,6 +865,7 @@ int mt7915_mac_sta_add(struct mt76_dev *
  	msta->wcid.sta_disabled = 1;
  	msta->wcid.idx = idx;
  	msta->wcid.phy_idx = ext_phy;
@@ -20,7 +20,7 @@
  		set_bit(MT_WCID_FLAG_TDLS_PEER, &msta->wcid.flags);
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -543,6 +543,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -541,6 +541,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
  	struct mt7915_mcu_all_sta_info_event *res;
  	u16 sta_num;
  	u16 i;
@@ -28,7 +28,7 @@
  
  	res = (struct mt7915_mcu_all_sta_info_event *)skb->data;
  	if (skb->len < sizeof(*res))
-@@ -560,6 +561,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -557,6 +558,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
  		struct ieee80211_sta *sta;
  		struct mt7915_sta *msta;
  		u32 prev_tx_airtime, prev_rx_airtime, diff_tx_airtime, diff_rx_airtime;
@@ -46,7 +46,7 @@
  
  			for (ac = IEEE80211_AC_VO; ac < IEEE80211_NUM_ACS; ++ac) {
  				u8 lmac_ac = mt76_connac_lmac_mapping(ac);
-@@ -616,7 +621,8 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -615,7 +620,8 @@ mt7915_mcu_rx_all_sta_info_event(struct
  							clear);
  				}
  
@@ -56,7 +56,7 @@
  					dev_dbg(dev->mt76.dev,
  						"sta: %02X:%02X:%02X:%02X:%02X:%02X ac: %u tx_read: %u rx_read: %u tx_time: %u rx_time: %u tx_prev: %u rx_prev: %u tx_diff: %u rx_diff: %u\n",
  						sta->addr[0], sta->addr[1], sta->addr[2], sta->addr[3], sta->addr[4], sta->addr[5],
-@@ -629,9 +635,9 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -627,9 +633,9 @@ mt7915_mcu_rx_all_sta_info_event(struct
  						prev_tx_airtime, prev_rx_airtime,
  						diff_tx_airtime, diff_rx_airtime);
  

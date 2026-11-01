@@ -14,7 +14,7 @@ Signed-off-by: Peter Chiu <chui-hao.chiu@mediatek.com>
 
 --- a/tx.c
 +++ b/tx.c
-@@ -379,6 +379,14 @@ mt76_tx(struct mt76_phy *phy, struct iee
+@@ -387,6 +387,14 @@ mt76_tx(struct mt76_phy *phy, struct iee
  		head = &wcid->tx_offchannel;
  	else
  		head = &wcid->tx_pending;

@@ -12,7 +12,7 @@ Subject: [PATCH 1023/1051] wifi: mt76: mt7915: amsdu set and get control
 
 --- a/mt7915/mac.c
 +++ b/mt7915/mac.c
-@@ -1983,6 +1983,13 @@ static void mt7915_mac_severe_check(stru
+@@ -1984,6 +1984,13 @@ static void mt7915_mac_severe_check(stru
  	dev->ple1_sts = ple_err;
  }
  
@@ -28,7 +28,7 @@ Subject: [PATCH 1023/1051] wifi: mt76: mt7915: amsdu set and get control
  {
 --- a/mt7915/mt7915.h
 +++ b/mt7915/mt7915.h
-@@ -819,6 +819,7 @@ int mt7915_mmio_wed_init(struct mt7915_d
+@@ -837,6 +837,7 @@ int mt7915_mmio_wed_init(struct mt7915_d
  			 bool pci, int *irq);
  
  #ifdef CONFIG_MTK_VENDOR

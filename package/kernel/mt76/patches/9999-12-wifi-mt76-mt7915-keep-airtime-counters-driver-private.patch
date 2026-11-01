@@ -1,6 +1,6 @@
 --- a/mt76.h
 +++ b/mt76.h
-@@ -372,16 +372,12 @@ struct mt76_sta_stats {
+@@ -368,16 +368,12 @@ struct mt76_sta_stats {
  	u32 tx_packets;		/* unit: MSDU */
  	u32 tx_retries;
  	u32 tx_failed;
@@ -19,7 +19,7 @@
  enum mt76_wcid_flags {
 --- a/mt7915/mcu.c
 +++ b/mt7915/mcu.c
-@@ -558,6 +558,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -555,6 +555,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
  		bool clear;
  		struct mt76_wcid *wcid;
  		struct ieee80211_sta *sta;
@@ -42,26 +42,28 @@
 -				prev_rx_airtime = wcid->stats.rx_airtime[ac];
 -				wcid->stats.tx_airtime[ac] = le32_to_cpu(res->airtime[i].tx[lmac_ac]);
 -				wcid->stats.rx_airtime[ac] = le32_to_cpu(res->airtime[i].rx[lmac_ac]);
-+				prev_tx_airtime = *tx_airtime;
-+				prev_rx_airtime = *rx_airtime;
-+				*tx_airtime = le32_to_cpu(res->airtime[i].tx[lmac_ac]);
-+				*rx_airtime = le32_to_cpu(res->airtime[i].rx[lmac_ac]);
- 
+-
 -				if (wcid->stats.tx_airtime[ac] >= prev_tx_airtime) {
 -					diff_tx_airtime = wcid->stats.tx_airtime[ac] - prev_tx_airtime;
 -				} else {
 -					diff_tx_airtime = wcid->stats.tx_airtime[ac];
 -				}
-+				if (*tx_airtime >= prev_tx_airtime)
-+					diff_tx_airtime = *tx_airtime - prev_tx_airtime;
-+				else
-+					diff_tx_airtime = *tx_airtime;
- 
+-
 -				if (wcid->stats.rx_airtime[ac] >= prev_rx_airtime) {
 -					diff_rx_airtime = wcid->stats.rx_airtime[ac] - prev_rx_airtime;
 -				} else {
 -					diff_rx_airtime = wcid->stats.rx_airtime[ac];
 -				}
++				prev_tx_airtime = *tx_airtime;
++				prev_rx_airtime = *rx_airtime;
++				*tx_airtime = le32_to_cpu(res->airtime[i].tx[lmac_ac]);
++				*rx_airtime = le32_to_cpu(res->airtime[i].rx[lmac_ac]);
++
++				if (*tx_airtime >= prev_tx_airtime)
++					diff_tx_airtime = *tx_airtime - prev_tx_airtime;
++				else
++					diff_tx_airtime = *tx_airtime;
++
 +				if (*rx_airtime >= prev_rx_airtime)
 +					diff_rx_airtime = *rx_airtime - prev_rx_airtime;
 +				else
@@ -72,7 +74,8 @@
  						clear = true;
  
  						dev_dbg(dev->mt76.dev,
-@@ -605,7 +607,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -606,8 +608,8 @@ mt7915_mcu_rx_all_sta_info_event(struct
+ 							ac,
  							le32_to_cpu(res->airtime[i].tx[lmac_ac]),
  							le32_to_cpu(res->airtime[i].rx[lmac_ac]),
 -							wcid->stats.tx_airtime[ac],
@@ -82,7 +85,8 @@
  							prev_tx_airtime, prev_rx_airtime,
  							diff_tx_airtime, diff_rx_airtime,
  							clear);
-@@ -619,7 +621,7 @@ mt7915_mcu_rx_all_sta_info_event(struct
+@@ -620,8 +622,8 @@ mt7915_mcu_rx_all_sta_info_event(struct
+ 						ac,
  						le32_to_cpu(res->airtime[i].tx[lmac_ac]),
  						le32_to_cpu(res->airtime[i].rx[lmac_ac]),
 -						wcid->stats.tx_airtime[ac],

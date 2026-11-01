@@ -1,6 +1,6 @@
 --- a/mt7915/vendor.c
 +++ b/mt7915/vendor.c
-@@ -738,6 +738,9 @@ mt7915_vendor_smesh_ctrl(struct mt7915_p
+@@ -740,6 +740,9 @@ mt7915_vendor_smesh_ctrl(struct mt7915_p
  	struct sk_buff *skb;
  	int ret = 0;
  
@@ -10,20 +10,20 @@
  	ret = mt76_mcu_send_and_get_msg(&dev->mt76, MCU_EXT_CMD(SMESH_CTRL),
  					&req, sizeof(req), !write, &skb);
  
-@@ -746,15 +749,16 @@ mt7915_vendor_smesh_ctrl(struct mt7915_p
+@@ -747,15 +750,16 @@ mt7915_vendor_smesh_ctrl(struct mt7915_p
  		return ret;
  
  	res = (struct mt7915_smesh_event *) skb->data;
--
--	if (!value)
--		return -EINVAL;
--
--	*value = res->value;
 +	if (skb->len < sizeof(*res)) {
 +		ret = -EMSGSIZE;
 +		goto out;
 +	}
  
+-	if (!value)
+-		return -EINVAL;
+-
+-	*value = res->value;
+-
 +	*value = le32_to_cpu(res->value);
 +out:
  	dev_kfree_skb(skb);
@@ -33,7 +33,7 @@
  }
  
  static int
-@@ -812,11 +816,15 @@ mt7915_vendor_amnt_set_addr(struct mt791
+@@ -813,11 +817,15 @@ mt7915_vendor_amnt_set_addr(struct mt791
  {
  	struct mt7915_air_monitor_ctrl *amnt_ctrl = &phy->amnt_ctrl;
  	struct mt7915_air_monitor_group *group;
@@ -76,7 +76,9 @@
  	return mt7915_vendor_amnt_set_addr(phy, index, mac_addr);
  }
  
-@@ -953,9 +971,12 @@ mt7915_amnt_dump(struct mt7915_phy *phy,
+@@ -951,11 +969,14 @@ static int
+ mt7915_amnt_dump(struct mt7915_phy *phy, struct sk_buff *skb,
+ 		 u8 amnt_idx, int *attrtype)
  {
 -	struct mt7915_air_monitor_entry *entry =
 -			&phy->amnt_ctrl.entry[amnt_idx];
@@ -102,7 +104,7 @@
  
  	return 1;
  }
-@@ -1010,24 +1033,48 @@ mt7915_vendor_amnt_ctrl_dump(struct wiph
+@@ -1010,24 +1032,48 @@ mt7915_vendor_amnt_ctrl_dump(struct wiph
  
  	amnt_idx = nla_get_u8(tb2[MTK_VENDOR_ATTR_AMNT_DUMP_INDEX]);
  

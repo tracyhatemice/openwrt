@@ -25,7 +25,7 @@
  }
  
  static int
-@@ -557,7 +557,7 @@ int mt76_register_phy(struct mt76_phy *p
+@@ -559,7 +559,7 @@ int mt76_register_phy(struct mt76_phy *p
  		return ret;
  
  	if (phy->cap.has_2ghz) {
@@ -34,7 +34,7 @@
  		if (ret)
  			return ret;
  	}
-@@ -757,7 +757,7 @@ int mt76_register_device(struct mt76_dev
+@@ -759,7 +759,7 @@ int mt76_register_device(struct mt76_dev
  		return ret;
  
  	if (phy->cap.has_2ghz) {
