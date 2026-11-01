@@ -173,7 +173,7 @@ Signed-off-by: Peter Chiu <chui-hao.chiu@mediatek.com>
 +	u8 phy_idx = (info->hw_queue & MT_TX_HW_QUEUE_PHY) >> 2;
  	__le32 *ptr = (__le32 *)txwi_ptr;
  	u8 *txwi = (u8 *)txwi_ptr;
- 	u8 link_id;
+ 	bool host_txd;
 @@ -1089,7 +1090,7 @@ int mt7996_tx_prepare_skb(struct mt76_de
  	t = (struct mt76_txwi_cache *)(txwi + mdev->drv->txwi_size);
  	t->skb = tx_info->skb;

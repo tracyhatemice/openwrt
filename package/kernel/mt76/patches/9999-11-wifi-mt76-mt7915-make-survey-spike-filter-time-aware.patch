@@ -37,18 +37,7 @@
  
  	/* strict order */
  	if (is_mt7915(&dev->mt76)) {
-@@ -3502,39 +3522,56 @@ int mt7915_mcu_get_chan_mib_info(struct
- 	if (ret)
- 		return ret;
- 
-+	if (skb->len < offs_cc + len * sizeof(*res)) {
-+		ret = -EMSGSIZE;
-+		goto free_skb;
-+	}
-+
- 	res = (struct mt7915_mcu_mib *)(skb->data + offs_cc);
- 
- #define __res_u64(s) le64_to_cpu(res[s].data)
+@@ -3513,33 +3533,44 @@ int mt7915_mcu_get_chan_mib_info(struct
  	/* subtract Tx backoff time from Tx duration for MT7915 */
  	if (is_mt7915(&dev->mt76)) {
  		u64 backoff = (__res_u64(4) & 0xffff) * 79;  /* 16us + 9us * 7 */
@@ -99,7 +88,6 @@
 +	state_ts->cc_busy = cc_busy;
  #undef __res_u64
  
-+free_skb:
  	dev_kfree_skb(skb);
  
 -	return 0;
