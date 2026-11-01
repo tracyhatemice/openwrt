@@ -90,7 +90,7 @@ Signed-off-by: StanleyYP Wang <StanleyYP.Wang@mediatek.com>
 +int hostapd_drv_three_wire_ctrl(struct hostapd_data *hapd);
  
  #include "drivers/driver.h"
- 
+ #include "scs.h"
 --- a/src/ap/hostapd.c
 +++ b/src/ap/hostapd.c
 @@ -2828,6 +2828,8 @@ dfs_offload:
