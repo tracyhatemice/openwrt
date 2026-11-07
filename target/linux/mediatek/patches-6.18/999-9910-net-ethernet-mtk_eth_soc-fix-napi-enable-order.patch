@@ -21,7 +21,7 @@ rx_napi is an array) and in mtk_remove().
 
 --- a/drivers/net/ethernet/mediatek/mtk_eth_soc.c
 +++ b/drivers/net/ethernet/mediatek/mtk_eth_soc.c
-@@ -5194,6 +5194,22 @@ static void mtk_pending_work(struct work
+@@ -5198,6 +5198,22 @@ static void mtk_pending_work(struct work
  	rtnl_unlock();
  }
  
@@ -44,7 +44,7 @@ rx_napi is an array) and in mtk_remove().
  static int mtk_free_dev(struct mtk_eth *eth)
  {
  	int i;
-@@ -6385,9 +6401,9 @@ err_deinit_ppe:
+@@ -6390,9 +6406,9 @@ err_deinit_ppe:
  	 */
  	cancel_work_sync(&eth->pending_work);
  	if (eth->dummy_dev) {
@@ -56,7 +56,7 @@ rx_napi is an array) and in mtk_remove().
  	}
  	mtk_ppe_deinit(eth);
  	mtk_mdio_cleanup(eth);
-@@ -6421,13 +6437,7 @@ static void mtk_remove(struct platform_d
+@@ -6426,13 +6442,7 @@ static void mtk_remove(struct platform_d
  	mtk_wed_exit();
  	mtk_hw_deinit(eth);
  
