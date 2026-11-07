@@ -59,7 +59,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  int mtk_foe_entry_set_wdma(struct mtk_eth *eth, struct mtk_foe_entry *entry,
  			   int wdma_idx, int txq, int bss, int wcid,
  			   bool amsdu_en)
-@@ -1389,6 +1412,77 @@ err_free_l2_flows:
+@@ -1421,6 +1444,77 @@ err_free_l2_flows:
  	return NULL;
  }
  
@@ -185,7 +185,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  #endif
 --- a/drivers/net/ethernet/mediatek/mtk_ppe_offload.c
 +++ b/drivers/net/ethernet/mediatek/mtk_ppe_offload.c
-@@ -45,6 +45,9 @@ struct mtk_flow_data {
+@@ -46,6 +46,9 @@ struct mtk_flow_data {
  		u16 sid;
  		u8 num;
  	} pppoe;
@@ -195,7 +195,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  };
  
  static const struct rhashtable_params mtk_flow_ht_params = {
-@@ -54,6 +57,9 @@ static const struct rhashtable_params mt
+@@ -55,6 +58,9 @@ static const struct rhashtable_params mt
  	.automatic_shrinking = true,
  };
  
@@ -205,7 +205,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  static int
  mtk_flow_set_ipv4_addr(struct mtk_eth *eth, struct mtk_foe_entry *foe,
  		       struct mtk_flow_data *data, bool egress)
-@@ -447,6 +453,14 @@ mtk_flow_offload_replace(struct mtk_eth
+@@ -468,6 +474,14 @@ mtk_flow_offload_replace(struct mtk_eth
  			data.pppoe.sid = act->pppoe.sid;
  			data.pppoe.num++;
  			break;
@@ -220,7 +220,7 @@ Signed-off-by: Daniel Pawlik <pawlik.dan@gmail.com>
  		default:
  			return -EOPNOTSUPP;
  		}
-@@ -545,6 +559,11 @@ mtk_flow_offload_replace(struct mtk_eth
+@@ -567,6 +581,11 @@ mtk_flow_offload_replace(struct mtk_eth
  	if (data.pppoe.num == 1)
  		mtk_foe_entry_set_pppoe(eth, &foe, data.pppoe.sid);
  
